@@ -52,7 +52,9 @@ void Ass_03_Task_03(void const * argument)
 
   while (1)
   {
-	  while((input[pos] = getchar()) != '\r'){
+	  safe_printf(">");
+	  // Reading in one character at a time into the word array, until the 'enter' key is pressed
+	  while((input[pos] = getchar()) != '\r'){// \r is equivalent to \n on putty
     	  printf("%c",input[pos]); // has to print it because putty does not do it for you
     	  pos++;
     	  if(pos == length){ // if the position is maxed the double its length using realloc
