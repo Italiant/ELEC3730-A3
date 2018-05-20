@@ -23,6 +23,7 @@
 #include <malloc.h>
 #include <string.h>
 #include <math.h>
+#include <stdlib.h>
 
 // OS handles
 extern osThreadId defaultTaskHandle;
