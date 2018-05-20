@@ -4,10 +4,6 @@
 
 #include "Ass-03.h"
 
-//
-// REPLACE THE EXAMPLE CODE WITH YOUR CODE
-//
-
 uint8_t myReadFile();
 
 FATFS SDFatFs;
@@ -48,13 +44,34 @@ void Ass_03_Task_03(void const * argument)
     }
   }
 
+  // String parser
+  // ------------------------------------------------------------------------------
+  uint8_t* input = (uint8_t*)malloc(sizeof(uint8_t)*20);
+  int pos = 0;
+  int length = 20;
+
   while (1)
   {
-	  c = getchar();
-      sprintf(s,"Task 3: %d (got '%c')",loop,c);
-      osMutexWait(myMutex01Handle, osWaitForever);
-      BSP_LCD_DisplayStringAt(5,220, s, LEFT_MODE);
-      osMutexRelease(myMutex01Handle);
+	  while((input[pos] = getchar()) != '\r'){
+    	  printf("%c",input[pos]); // has to print it because putty does not do it for you
+    	  pos++;
+    	  if(pos == length){ // if the position is maxed the double its length using realloc
+    		  length *= 2;
+    		  input = (uint8_t*)realloc(input, sizeof(uint8_t)*length);
+    	  }
+      }
+      input[pos] = '\0';
+      pos = 0;
+
+      //sprintf(s,"Task 3: %d (got '%c')",loop,c);
+
+      //osMutexWait(myMutex01Handle, osWaitForever);
+
+      //BSP_LCD_DisplayStringAt(5,220, s, LEFT_MODE);
+
+      //osMutexRelease(myMutex01Handle);
+  // ------------------------------------------------------------------------------
+
       HAL_GPIO_TogglePin(GPIOD, LD3_Pin); // Toggle LED3
       loop++;
 
@@ -63,8 +80,10 @@ void Ass_03_Task_03(void const * argument)
       safe_printf("\n");
 
       myReadFile();
-  }
-}
+
+  } // end of while(1) loop
+
+}// end of task 3
 
 uint8_t myReadFile()
 {
@@ -98,4 +117,4 @@ uint8_t myReadFile()
   // FATFS_UnLinkDriver(SD_Path);
 
   return 0;
-}
+} // end of myReadFile function
