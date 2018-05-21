@@ -11,7 +11,7 @@ void Ass_03_Task_01(void const * argument)
   uint8_t ts[100];
   uint16_t i;
 
-  safe_printf("Hello from Task 1\n");
+  safe_printf("Task 1\n");
 
   // Display LED screen layout
   // ------------------------------------------------------------------------------
