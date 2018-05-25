@@ -24,18 +24,18 @@ void Ass_03_Task_04(void const * argument)
   uint16_t ypos=0;
   uint16_t last_xpos=0;
   uint16_t last_ypos=0;
-#define XOFF 55
-#define YOFF 80
-#define XSIZE 250
-#define YSIZE 150
+#define XOFF 134
+#define YOFF 5
+#define XSIZE 182
+#define YSIZE 188
 
   osSignalWait(1,osWaitForever);
   safe_printf("Hello from Task 4 - Analog Input (turn ADC knob or use pulse sensor)\n");
 
   // Draw a box to plot in
-  osMutexWait(myMutex01Handle, osWaitForever);
+ /* osMutexWait(myMutex01Handle, osWaitForever);
   BSP_LCD_DrawRect(XOFF-1,YOFF-1,XSIZE+1,YSIZE+1);
-  osMutexRelease(myMutex01Handle);
+  osMutexRelease(myMutex01Handle);*/
 
   // Start the conversion process
   status = HAL_ADC_Start_DMA(&hadc1, (uint32_t *)&ADC_Value, 1000);
@@ -92,6 +92,7 @@ void Ass_03_Task_04(void const * argument)
 		  last_xpos=0;
 	  }
 	  HAL_GPIO_WritePin(GPIOD, LD4_Pin, GPIO_PIN_RESET);
+
   }
 }
 
