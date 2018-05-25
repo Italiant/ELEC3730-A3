@@ -37,6 +37,7 @@ void Ass_03_Task_01(void const * argument)
   BSP_LCD_Init();
   BSP_LCD_DisplayOn();
   BSP_TP_Init();
+  BSP_LCD_Clear(LCD_COLOR_WHITE);
   //
   // Signal other tasks to start
   osSignalSet(myTask02Handle, 1);
@@ -44,20 +45,33 @@ void Ass_03_Task_01(void const * argument)
   osSignalSet(myTask04Handle, 1);
 
   // Display welcome message
-  osMutexWait(myMutex01Handle, osWaitForever);
+  /*osMutexWait(myMutex01Handle, osWaitForever);
   BSP_LCD_Clear(LCD_COLOR_WHITE);
   BSP_LCD_SetFont(&Font12);
   BSP_LCD_SetTextColor(LCD_COLOR_BLACK);
   BSP_LCD_DisplayStringAt(5, 5, (uint8_t*)"ELEC3730 Assignment 3 (v03 $Rev: 1330 $)",LEFT_MODE);
   BSP_LCD_DisplayStringAt(5,20, (uint8_t*)"This demonstration code can be used",LEFT_MODE);
   BSP_LCD_DisplayStringAt(5,35, (uint8_t*)"as a starting point for the assignment.",LEFT_MODE);
-  osMutexRelease(myMutex01Handle);
+  osMutexRelease(myMutex01Handle);*/
+
+  uint8_t* input = (uint8_t*)malloc(sizeof(uint8_t)*20);
+  int pos = 0;
+  int length = 20;
 
   while (1)
   {
-	  c = getchar();
-	  safe_printf("Task 1: %d (got '%c')\n",loop,c);
-      loop++;
+	  safe_printf(">");
+	  // Reading in one character at a time into the word array, until the 'enter' key is pressed
+	  while((input[pos] = getchar()) != '\r'){// \r is equivalent to \n on putty
+    	  printf("%c",input[pos]); // has to print it because putty does not do it for you
+    	  pos++;
+    	  if(pos == length){ // if the position is maxed the double its length using realloc
+    		  length *= 2;
+    		  input = (uint8_t*)realloc(input, sizeof(uint8_t)*length);
+    	  }
+      }
+      input[pos] = '\0';
+      pos = 0;
       myReadFile();
       myWriteFile();
   }
