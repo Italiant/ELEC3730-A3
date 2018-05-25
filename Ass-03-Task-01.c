@@ -40,26 +40,26 @@ void Ass_03_Task_01(void const * argument)
 
   // Draw straight lines
   // Horizontal
-  int xypos = 48;
-  for(int i = 0; i < 4; i++, xypos += 48){
-	  BSP_LCD_DrawHLine(3, xypos, 129, xypos);
-  }
-  BSP_LCD_DrawHLine(3, 238, 129, 238);
+	  int xypos = 48;
+	  for(int i = 0; i < 4; i++, xypos += 48){
+		  BSP_LCD_DrawHLine(3, xypos, 126);
+	  }
+	  BSP_LCD_DrawHLine(3, 238, 123);
 
-  BSP_LCD_DrawHLine(139, 238, 193, 238);
-  BSP_LCD_DrawHLine(196, 238, 250, 238);
-  BSP_LCD_DrawHLine(253, 238, 307, 238);
+	  BSP_LCD_DrawHLine(139, 238, 54);
+	  BSP_LCD_DrawHLine(196, 238, 54);
+	  BSP_LCD_DrawHLine(253, 238, 54);
 
-  // Vertical
-  int y1pos = 3, y2pos = 48;
-  for(int i = 0; i < 4; i++, y1pos += 48, y2pos += 48){
-  	BSP_LCD_DrawVLine(129, y1pos, 129, y2pos);
-  }
-  BSP_LCD_DrawVLine(129, 195, 129, 238);
+	  // Vertical
+	  int y1pos = 3, y2pos = 48;
+	  for(int i = 0; i < 4; i++, y1pos += 48, y2pos += 48){
+	  	BSP_LCD_DrawVLine(129, y1pos, 45);
+	  }
+	  BSP_LCD_DrawVLine(129, 195, 43);
 
-  BSP_LCD_DrawVLine(193, 208, 193, 238);
-  BSP_LCD_DrawVLine(250, 208, 250, 238);
-  BSP_LCD_DrawVLine(307, 208, 307, 238);
+	  BSP_LCD_DrawVLine(193, 208, 30);
+	  BSP_LCD_DrawVLine(250, 208, 30);
+	  BSP_LCD_DrawVLine(307, 208, 30);
 
   // Write text
   BSP_LCD_SetFont(&Font24);
