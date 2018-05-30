@@ -121,22 +121,20 @@ FRESULT scan_files(char* path){
 				res = scan_files(path);                    /* Enter the directory */
 				if (res != FR_OK) break;
 				path[i] = 0;
+				safe_printf("%s (folder)\n", inf.fname);
 				folders++;
 			} else {                                       /* It is a file. */
-				safe_printf("Path: %s\n", path);
-				safe_printf("Name: %s\n", inf.fname);
-				safe_printf("Size: %d\n", inf.fsize);
+				safe_printf("%s (%d bytes)\n", inf.fname, inf.fsize);
 				//printf("%s\n",inf.fattrib);
-				safe_printf("Date: %d\n", inf.fdate);
-				safe_printf("Time: %d\n", inf.ftime);
+				//safe_printf("Date: %d\n", inf.fdate);
+				//safe_printf("Time: %d\n", inf.ftime);
 				files++;
 			}
 		}
 		f_closedir(&dir);
-		safe_printf("Folders: %d\n", folders);
-		safe_printf("Files: %d\n", files);
 	}
-
+	safe_printf("Folders: %d\n", folders);
+	safe_printf("Files: %d\n", files);
 	return res;
 }
 
