@@ -18,6 +18,10 @@
 uint8_t myReadFile();
 uint8_t myWriteFile();
 int string_parser(uint8_t *inp, uint8_t **array_of_words_p[]);
+int debug(int debug, uint8_t** string);
+int analog_f(int *analog, uint8_t** string);
+int ls_f(uint8_t** string);
+FRESULT scan_files(char* path);
 
 FIL MyFile;
 FIL MyFile2, MyFile3;
@@ -25,10 +29,6 @@ FRESULT Status;
 
 void Ass_03_Task_01(void const * argument)
 {
-	//Coordinate display;
-	uint8_t **strs;
-	uint8_t c;
-
 	safe_printf("Hello from Task 1 - Console (serial input)\n");
 	safe_printf("INFO: Initialise LCD and TP first...\n");
 
@@ -37,24 +37,29 @@ void Ass_03_Task_01(void const * argument)
 	BSP_LCD_DisplayOn();
 	BSP_TP_Init();
 	BSP_LCD_Clear(LCD_COLOR_WHITE);
-	//
+
 	// Signal other tasks to start
 	osSignalSet(myTask02Handle, 1);
 	osSignalSet(myTask03Handle, 1);
 	osSignalSet(myTask04Handle, 1);
 
-	uint8_t* input1;
-	input1 = (uint8_t*)malloc(sizeof(uint8_t)*20);
+	//Coordinate display;
+	uint8_t **strs;
+	uint8_t c;
+	uint8_t* input1 = (uint8_t*)malloc(sizeof(uint8_t)*20);
 	int pos = 0;
 	int words = 0;
+	int debug1 = 0;
+	int analog = 10;
 
 	while (1)
 	{
 		safe_printf(">");
 		c = getchar();
 		input1[pos] = c;
-		if(input1[pos] == '\r'){
+		safe_printf("%c", input1[pos]);
 
+		if(input1[pos] == '\r'){
 			input1[pos] = '\0';
 			safe_printf("Input String = %s\n", input1);
 			words = string_parser(input1, &strs);
@@ -66,17 +71,128 @@ void Ass_03_Task_01(void const * argument)
 			}
 			pos = 0;
 
+			debug1 = debug(debug1, strs);
+
+			analog_f(&analog, strs);
+
+			ls_f(strs);
+
 			//myReadFile();
 			//myWriteFile();
-
-
 		}else{
-			safe_printf("Input Character = %c\n", input1[pos]);
 			pos++;
 		}
 	}
 
 }
+
+
+int ls_f(uint8_t** string){
+	FATFS fs;
+	FRESULT res;
+	char buff[256];
+	if(strcmp((const char *)string[0], "ls") == 0){
+		res = f_mount(&fs, "", 1);
+		if (res == FR_OK) {
+			strcpy(buff, "/");
+			res = scan_files(buff);
+		}
+	}
+	return 0;
+}
+
+
+
+FRESULT scan_files(char* path){
+	FRESULT res;
+	DIR dir;
+	int i;
+	static FILINFO inf;
+	int folders = 0, files = 0;
+
+	res = f_opendir(&dir, path);                       /* Open the directory */
+	if (res == FR_OK) {
+		for (;;) {
+			res = f_readdir(&dir, &inf);                   /* Read a directory item */
+			if (res != FR_OK || inf.fname[0] == 0) break;  /* Break on error or end of dir */
+			if (inf.fattrib & AM_DIR) {                    /* It is a directory */
+				i = strlen(path);
+				sprintf(&path[i], "/%s", inf.fname);
+				res = scan_files(path);                    /* Enter the directory */
+				if (res != FR_OK) break;
+				path[i] = 0;
+				folders++;
+			} else {                                       /* It is a file. */
+				safe_printf("Path: %s\n", path);
+				safe_printf("Name: %s\n", inf.fname);
+				safe_printf("Size: %d\n", inf.fsize);
+				//printf("%s\n",inf.fattrib);
+				safe_printf("Date: %d\n", inf.fdate);
+				safe_printf("Time: %d\n", inf.ftime);
+				files++;
+			}
+		}
+		f_closedir(&dir);
+		safe_printf("Folders: %d\n", folders);
+		safe_printf("Files: %d\n", files);
+	}
+
+	return res;
+}
+
+
+
+
+int analog_f(int *analog, uint8_t** string){
+	int number;
+	char *pnt;
+	int pre;
+	int error = 0;
+
+	if(string[1] == '\0'){
+
+	}else{
+		if(strcmp((const char *)string[0], "analog") == 0){
+			strtod((const char *)string[1], &pnt);
+			if(*pnt != 0){
+				safe_printf("ERROR: Number conversion unsuccessful\n");
+				error = 1;
+			}
+			if(*analog < 0){
+				safe_printf("ERROR: Number must be positive\n");
+				error = 1;
+			}
+			else if (error == 0){
+				number = atoi((const char *)string[1]);
+				pre = *analog;
+				*analog = number;
+				safe_printf("Plotting time changed from (%d)s to (%d)s\n", pre, *analog);
+			}
+		}
+	}
+	return 0;
+}
+
+
+
+
+int debug(int debug, uint8_t** string){
+	int ret;
+	if(strcmp((const char *)string[0], "debug") == 0){
+		debug = !debug;
+		if(debug){
+			ret = 1;
+			printf("Debug messages will be displayed\n");
+		}else{
+			printf("Debug messages will not be displayed\n");
+			ret = 0;
+		}
+	}
+	return ret;
+}
+
+
+
 
 int string_parser(uint8_t *inp, uint8_t **array_of_words_p[]){
 
