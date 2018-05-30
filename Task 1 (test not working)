@@ -3,6 +3,7 @@
 //   $Author: Peter $
 
 #include "Ass-03.h"
+#include <stdlib.h>
 
 // This is the console task. Can use your code from the previous assignment
 // and expand.
@@ -16,153 +17,142 @@
 
 uint8_t myReadFile();
 uint8_t myWriteFile();
-uint8_t string_parser(uint8_t *input, uint8_t **strings);
+int string_parser(uint8_t *inp, uint8_t **array_of_words_p[]);
 
 FIL MyFile;
 FIL MyFile2, MyFile3;
 FRESULT Status;
 
-/*
- *
 void Ass_03_Task_01(void const * argument)
 {
+	//Coordinate display;
+	uint8_t **strs;
+	uint8_t c;
 
-  uint32_t loop=0;
-  uint8_t ts[100];
-  uint16_t i;
-  Coordinate display;
-  char c;
+	safe_printf("Hello from Task 1 - Console (serial input)\n");
+	safe_printf("INFO: Initialise LCD and TP first...\n");
 
-  safe_printf("Hello from Task 1 - Console (serial input)\n");
-  safe_printf("INFO: Initialise LCD and TP first...\n");
+	// STEPIEN: Initialize and turn on LCD and calibrate the touch panel
+	BSP_LCD_Init();
+	BSP_LCD_DisplayOn();
+	BSP_TP_Init();
+	BSP_LCD_Clear(LCD_COLOR_WHITE);
+	//
+	// Signal other tasks to start
+	osSignalSet(myTask02Handle, 1);
+	osSignalSet(myTask03Handle, 1);
+	osSignalSet(myTask04Handle, 1);
 
-  // STEPIEN: Initialize and turn on LCD and calibrate the touch panel
-  BSP_LCD_Init();
-  BSP_LCD_DisplayOn();
-  BSP_TP_Init();
-  BSP_LCD_Clear(LCD_COLOR_WHITE);
-  //
-  // Signal other tasks to start
-  osSignalSet(myTask02Handle, 1);
-  osSignalSet(myTask03Handle, 1);
-  osSignalSet(myTask04Handle, 1);
+	uint8_t* input1;
+	input1 = (uint8_t*)malloc(sizeof(uint8_t)*20);
+	int pos = 0;
+	int words = 0;
 
-  uint8_t *input1;
-  input1 = (uint8_t*)malloc(sizeof(uint8_t)*256);
-  free(input1);
-  int pos = 0;
+	while (1)
+	{
+		safe_printf(">");
+		c = getchar();
+		input1[pos] = c;
+		if(input1[pos] == '\r'){
 
-  while (1)
-  {
-	  safe_printf(">");
-	  c = getchar();
-	  input1[pos] = c;
-	  if(input1[pos] == '\r'){
+			input1[pos] = '\0';
+			safe_printf("Input String = %s\n", input1);
+			words = string_parser(input1, &strs);
 
-		  input1[pos] = '\0';
-		  safe_printf("Input String = %s\n", input1);
-		  string_parser(input1);
-		  //myReadFile();
-		  //myWriteFile();
-		  free(input1);
-		  pos = 0;
+			safe_printf("> %s\n", input1);
+			safe_printf("Count	: %d\n", words);
+			for(int j = 0; j < words; j++){ // prints out words
+				safe_printf("Word(%d)	: %s\n", j, strs[j]);
+			}
+			pos = 0;
 
-	  }else{
-		  safe_printf("Input Character = %c\n", input1[pos]);
-		  pos++;
-	  }
-  }
+			//myReadFile();
+			//myWriteFile();
+
+
+		}else{
+			safe_printf("Input Character = %c\n", input1[pos]);
+			pos++;
+		}
+	}
 
 }
 
-*/
+int string_parser(uint8_t *inp, uint8_t **array_of_words_p[]){
 
-void Ass_03_Task_01(void const * argument)
-{
+	int string_length = 0;
+	for (int i = 0; inp[i] != '\0'; i++){		// reading though getting the length of the input string
+		string_length++;
+	}
 
-  uint32_t loop=0;
-  uint8_t ts[100];
-  uint16_t i;
-  Coordinate display;
-  uint8_t **strs;
-  char c;
+	uint8_t *pinp = (uint8_t*)malloc(sizeof(uint8_t) * string_length);
+	int pinp_it = 0;
+	for (int i = 0; inp[i] != '\0'; i++){
+		if (inp[i] != 8){
+			pinp[pinp_it] = inp[i];
+			pinp_it++;
+		}
+		else if (pinp_it > 0){
+			pinp_it--;
+		}
+	}
+	pinp[pinp_it] = '\0';
 
-  safe_printf("Hello from Task 1 - Console (serial input)\n");
-  safe_printf("INFO: Initialise LCD and TP first...\n");
+	int letter_count = 0;
+	int word_count = 0;
+	for (int i = 0; inp[i] != '\0'; i++){
+		if ((i > 0 && inp[i] == ' ' && inp[i-1] != ' ') 	// if the character is a space and the previous (reason for i > 0) character wasnt a space
+				|| (inp[i+1] == '\0' && inp[i] != ' ')){		// OR this is the last word and the character isnt a space i.e. it is a word
+			word_count++;
+		}
+	}
 
-  // STEPIEN: Initialize and turn on LCD and calibrate the touch panel
-  BSP_LCD_Init();
-  BSP_LCD_DisplayOn();
-  BSP_TP_Init();
-  BSP_LCD_Clear(LCD_COLOR_WHITE);
-  //
-  // Signal other tasks to start
-  osSignalSet(myTask02Handle, 1);
-  osSignalSet(myTask03Handle, 1);
-  osSignalSet(myTask04Handle, 1);
+	*array_of_words_p = (uint8_t**)malloc(sizeof(uint8_t*) * (word_count));
+	word_count = 0;
 
-  uint8_t *input1;
-  input1 = (uint8_t*)malloc(sizeof(uint8_t)*100);
-  free(input1);
-  int pos = 0;
+	for (int i = 0; pinp[i] != '\0'; i++){
+		if ((i > 0 && pinp[i] == ' ' && pinp[i-1] != ' ') || (pinp[i+1] == '\0' && pinp[i] != ' ')){	// same word check as before
+			if (pinp[i+1] == '\0'){	//if this is a word and it is the last word
+				letter_count++;		// off by one error says i need to increment the letter count...
+			}
+			(*array_of_words_p)[word_count] = (uint8_t*)malloc(sizeof(uint8_t)*(letter_count+1));		//allocate memory of lettercount size at this words point in the array
 
-  while (1)
-  {
-	  safe_printf(">");
-	  c = getchar();
-	  input1[pos] = c;
-	  if(input1[pos] == '\r'){
+			letter_count = 0;		//reset lettercount for the next word
+			word_count++;
+		}
+		if (i > 0 && pinp[i] == ' ' && pinp[i-1] == ' '){		// if this is a space and the previous character was a space
+			continue;										// dont increment the letter count just continue reading
+		}
+		else {
+			letter_count++;
+		}
+	}
 
-		  input1[pos] = '\0';
-		  safe_printf("Input String = %s\n", input1);
-		  string_parser(input1, strs);
-		  //myReadFile();
-		  //myWriteFile();
-		  free(input1);
-		  pos = 0;
+	word_count = 0;
+	letter_count = 0;
 
-	  }else{
-		  safe_printf("Input Character = %c\n", input1[pos]);
-		  pos++;
-	  }
-  }
+	for (int i = 0; pinp[i] != '\0'; i++){
+		if ((i > 0 && pinp[i] == ' ' && pinp[i-1] != ' ') || (pinp[i+1] == '\0' && pinp[i] != ' ')){	// same word check again
+			if (pinp[i+1] == '\0'){	//if this is a word and it is the last word
+				(*array_of_words_p)[word_count][letter_count] = pinp[i];
+				letter_count++;
+			}
+			(*array_of_words_p)[word_count][letter_count] = '\0';
+			word_count++;
+			letter_count = 0;
+		}
+		else if (pinp[i] == ' '){		// if this is a space and the previous character was a space
+			continue;										// dont increment the letter count just continue reading
+		}
+		else{
+			(*array_of_words_p)[word_count][letter_count] = pinp[i];
+			letter_count++;
+		}
+	}
+	free(pinp);
 
-}
+	return word_count;
 
-uint8_t string_parser(uint8_t *input, uint8_t **strings)
-{
-	safe_printf("here");
-    int words = 0; 					// Integer counter for the amount of words entered into the console
-    int letters = 0; 					// Integer counter for the amount of letters in each word entered into the console
-
-	 for(int i = 0; input[i] != '\0'; i++){
-		    	  // Checking for spaces and the Null character
-		    	  if((i > 0 && input[i] == ' ' && input[i-1] != ' ') || (input[i+1] == '\0' && input[i] != ' ')){
-		    		   // Checks for each letter in the word by continuing to increment until the end of the word
-		    		  if(input[i+1] == '\0'){
-		    			  strings[words][letters] = input[i];
-		    			  letters++;
-		    		  }
-		    		  strings[words][letters] = '\0';
-		    		  words++;
-		    		  letters = 0;
-		    	  }
-		    	  else if(input[i] == ' '){
-		    		  continue;
-	 	 	 	  }
-		    	  else{
-	 	 	 	 	  strings[words][letters] = input[i];
-		    		  letters++;
-		    	  }
-		      }
-
-		      safe_printf("> %s\n", input);
-		      safe_printf("Count	: %d\n", words);
-
-		      for(int j = 0; j < words; j++){ // prints out words
-		    	  safe_printf("Word(%d)	: %s\n", j, strings[j]);
-		      }
-		      return 0;
 }
 
 uint8_t myReadFile()
