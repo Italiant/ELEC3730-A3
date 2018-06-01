@@ -40,6 +40,7 @@ extern osSemaphoreId myBinarySem05Handle;
 extern osSemaphoreId myBinarySem06Handle;
 extern osMessageQId myQueue01Handle;
 extern osMessageQId myQueue02Handle;
+extern osMessageQId myQueue03Handle;
 extern osMutexId myMutex01Handle; // Protect LCD
 extern osMutexId myMutex02Handle; // Protect console output
 
