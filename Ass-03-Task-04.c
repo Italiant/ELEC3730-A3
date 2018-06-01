@@ -51,8 +51,14 @@ void Ass_03_Task_04(void const * argument)
   // Start main loop
   while (1)
   {
-	  //event = osMessageGet(message_analog, osWaitForever);
-	  //start = event.value.v;
+
+	  osEvent event1;
+
+	  	event1 = osMessageGet(myQueue02Handle, 5);
+	      if (event1.status == osEventMessage)
+	      {
+	    	  start = event1.value.v;
+	      }
 
 	  if(start == 1){
 
@@ -104,7 +110,7 @@ void Ass_03_Task_04(void const * argument)
 
 	  }
 	  else{
-		  safe_printf("Graph turned off\n")
+
 	  }
   }
 }
