@@ -24,7 +24,6 @@
 #include <malloc.h>
 #include <string.h>
 #include <math.h>
-#include <stdlib.h>
 
 // OS handles
 extern osThreadId defaultTaskHandle;
@@ -40,6 +39,7 @@ extern osSemaphoreId myBinarySem04Handle;
 extern osSemaphoreId myBinarySem05Handle;
 extern osSemaphoreId myBinarySem06Handle;
 extern osMessageQId myQueue01Handle;
+extern osMessageQId myQueue02Handle;
 extern osMutexId myMutex01Handle; // Protect LCD
 extern osMutexId myMutex02Handle; // Protect console output
 
@@ -64,8 +64,8 @@ extern uint8_t getfp(Coordinate *display);
 	printf(fmt, ##__VA_ARGS__); \
 	osMutexRelease(myMutex02Handle);
 
-
 extern int analog_global, flag, debug_global;
+
 //
 // ADD YOUR CODE
 //
