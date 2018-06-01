@@ -23,8 +23,10 @@ void draw_buttons();
 
 void Ass_03_Task_02(void const * argument)
 {
-
 	int loop=0;
+
+	safe_printf("%d", analog_global);
+	uint32_t start = 1;
 
 	Coordinate display;
 
@@ -60,6 +62,10 @@ while (1)
 			BSP_LCD_SetTextColor(LCD_COLOR_BLACK);
 			BSP_LCD_DisplayStringAt(6, 13, (uint8_t*)"Start",LEFT_MODE); 	// Start: (3,3)>(128,47)
 
+			start = 1;
+
+			//osMessagePut(message_analog, start, 0);
+
 			osMutexRelease(myMutex01Handle);
 		}
 		else if((display.y > 3) && (display.y < 95) && // Stop
@@ -75,6 +81,12 @@ while (1)
 			BSP_LCD_SetFont(&Font24);
 			BSP_LCD_SetTextColor(LCD_COLOR_BLACK);
 			BSP_LCD_DisplayStringAt(6, 61, (uint8_t*)"Stop",LEFT_MODE); 	// Stop: (3,51)>(128,95)
+
+			start = 0;
+
+			//osMessagePut(message_analog, start, 0);
+
+			//osMessagePut (analogQueue, (uint32_t)(start), 0);
 
 			osMutexRelease(myMutex01Handle);
 		}
