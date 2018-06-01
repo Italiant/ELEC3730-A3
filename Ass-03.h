@@ -64,6 +64,8 @@ extern uint8_t getfp(Coordinate *display);
 	printf(fmt, ##__VA_ARGS__); \
 	osMutexRelease(myMutex02Handle);
 
+
+extern int analog_global, flag, debug;
 //
 // ADD YOUR CODE
 //
