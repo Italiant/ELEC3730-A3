@@ -168,7 +168,7 @@ int analog_f(int *analog, uint8_t** string){
 			else if (error == 0){
 				number = atoi((const char *)string[1]);
 				pre = *analog;
-				analog = number;
+				*analog = number;
 				safe_printf("Plotting time changed from (%d)s to (%d)s\n", pre, *analog);
 			}
 	}
