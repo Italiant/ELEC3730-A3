@@ -24,6 +24,10 @@ void Ass_03_Task_04(void const * argument)
   uint16_t ypos=0;
   uint16_t last_xpos=0;
   uint16_t last_ypos=0;
+
+ // osEvent event;
+  uint32_t start = 1;
+
 #define XOFF 134
 #define YOFF 5
 #define XSIZE 182
@@ -47,6 +51,11 @@ void Ass_03_Task_04(void const * argument)
   // Start main loop
   while (1)
   {
+	  //event = osMessageGet(message_analog, osWaitForever);
+	  //start = event.value.v;
+
+	  if(start == 1){
+
 	  // Wait for first half of buffer
 	  osSemaphoreWait(myBinarySem05Handle, osWaitForever);
 	  osMutexWait(myMutex01Handle, osWaitForever);
@@ -93,6 +102,10 @@ void Ass_03_Task_04(void const * argument)
 	  }
 	  HAL_GPIO_WritePin(GPIOD, LD4_Pin, GPIO_PIN_RESET);
 
+	  }
+	  else{
+		  safe_printf("Graph turned off\n")
+	  }
   }
 }
 
