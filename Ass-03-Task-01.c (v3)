@@ -19,7 +19,7 @@ uint8_t myReadFile();
 uint8_t myWriteFile();
 int string_parser(uint8_t *inp, uint8_t **array_of_words_p[]);
 int debug(int *debug, uint8_t** string);
-int analog_f(int analog_g, int *analog, uint8_t** string);
+int analog_f(int *analog, uint8_t** string);
 int ls_f(uint8_t** string);
 FRESULT scan_files(char* path);
 
@@ -27,6 +27,8 @@ FIL MyFile;
 FIL MyFile2, MyFile3;
 FRESULT Status;
 int analog_global = 10;
+int flag = 0;
+int debug_global;
 
 void Ass_03_Task_01(void const * argument)
 {
@@ -55,10 +57,11 @@ void Ass_03_Task_01(void const * argument)
 
 	while (1)
 	{
+		debug1 = debug_global;
+
 		safe_printf(">");
 		c = getchar();
 		input1[pos] = c;
-		safe_printf("%c", input1[pos]);
 
 		if(input1[pos] == '\r'){
 			input1[pos] = '\0';
@@ -74,10 +77,13 @@ void Ass_03_Task_01(void const * argument)
 
 			if(strcmp((const char *)strs[0], "debug") == 0){
 				debug(&debug1, strs);
+				debug_global = debug1;
 				//safe_printf("Debug is %d\n", debug1);
 			}
 			else if(strcmp((const char *)strs[0], "analog") == 0){
-				analog_global = analog_f(analog_global, &analog, strs);
+				analog_f(&analog, strs);
+				analog_global = analog;
+				flag = 1;
 			}
 			else if(strcmp((const char *)strs[0], "ls") == 0){
 				ls_f(strs);
@@ -86,6 +92,7 @@ void Ass_03_Task_01(void const * argument)
 			//myReadFile();
 			//myWriteFile();
 		}else{
+			safe_printf("%c", input1[pos]);
 			pos++;
 		}
 	}
@@ -139,7 +146,7 @@ FRESULT scan_files(char* path){
 	return res;
 }
 
-int analog_f(int analog_g, int *analog, uint8_t** string){
+int analog_f(int *analog, uint8_t** string){
 	int number;
 	char *pnt;
 	int pre;
@@ -161,11 +168,10 @@ int analog_f(int analog_g, int *analog, uint8_t** string){
 				number = atoi((const char *)string[1]);
 				pre = *analog;
 				*analog = number;
-				analog_g = *analog;
 				safe_printf("Plotting time changed from (%d)s to (%d)s\n", pre, *analog);
 			}
 	}
-	return analog_g;
+	return 0;
 }
 
 int debug(int *debug, uint8_t** string){
@@ -173,9 +179,9 @@ int debug(int *debug, uint8_t** string){
 		*debug = !*debug;
 		if(*debug){
 			ret = 1;
-			printf("Debug messages will be displayed\n");
+			safe_printf("Debug messages will be displayed\n");
 		}else{
-			printf("Debug messages will not be displayed\n");
+			safe_printf("Debug messages will not be displayed\n");
 			ret = 0;
 		}
 	return ret;
