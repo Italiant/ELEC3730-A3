@@ -21,11 +21,14 @@ void draw_buttons();
 #define XSIZE 182
 #define YSIZE 188
 
+int analog_global;
+int flag;
+int debug_global = 0;
+
 void Ass_03_Task_02(void const * argument)
 {
 	int loop=0;
 
-	safe_printf("%d", analog_global);
 	uint32_t start = 1;
 
 	Coordinate display;
@@ -35,126 +38,192 @@ void Ass_03_Task_02(void const * argument)
 
 	draw_buttons();
 
-while (1)
-{
-	if (getfp(&display) == 0)
-    {
-		if((display.y > YOFF+5) && (display.y < YOFF+YSIZE-5) && // Graph box
-			(display.x > XOFF+5) && (display.x < XOFF+XSIZE-5))
-		{
-			osMutexWait(myMutex01Handle, osWaitForever);
-			BSP_LCD_FillCircle(display.x, display.y, 2);
-			osMutexRelease(myMutex01Handle);
-			loop++;
-			safe_printf("Task 2: %d (got  %3d,%3d)\n", loop, display.x, display.y);
-		}
-		else if((display.y > 3) && (display.y < 47) && // Start
-				(display.x > 3) && (display.x < 128))
-		{
+	while (1)
+	{
+		if(flag == 1){
 			osMutexWait(myMutex01Handle, osWaitForever);
 
-			BSP_LCD_SetTextColor(LCD_COLOR_GREEN);
-			BSP_LCD_FillRect(4, 4, 124, 43); // make origin one more and size both one less
-			HAL_Delay(200);
-			BSP_LCD_SetTextColor(LCD_COLOR_WHITE);
-			BSP_LCD_FillRect(4, 4, 124, 43);
-			BSP_LCD_SetFont(&Font24);
 			BSP_LCD_SetTextColor(LCD_COLOR_BLACK);
-			BSP_LCD_DisplayStringAt(6, 13, (uint8_t*)"Start",LEFT_MODE); 	// Start: (3,3)>(128,47)
-
-			start = 1;
-
-			//osMessagePut(message_analog, start, 0);
+			BSP_LCD_SetFont(&Font12);
+			uint8_t buffer[10]; 										 // Buffer string
+			sprintf((char *)buffer, "%d", analog_global);
+			BSP_LCD_DisplayStringAt(283, 195, buffer, LEFT_MODE); // 10s: (133,4)>(318,192)
+			BSP_LCD_DisplayStringAt(307, 195, (uint8_t*)"s", LEFT_MODE); // 10s: (133,4)>(318,192)
+			flag = 0;
 
 			osMutexRelease(myMutex01Handle);
 		}
-		else if((display.y > 3) && (display.y < 95) && // Stop
-				(display.x > 3) && (display.x < 128))
+
+		if (getfp(&display) == 0)
 		{
-			osMutexWait(myMutex01Handle, osWaitForever);
+			if((display.y > YOFF+5) && (display.y < YOFF+YSIZE-5) && // Graph box
+					(display.x > XOFF+5) && (display.x < XOFF+XSIZE-5))
+			{
+				osMutexWait(myMutex01Handle, osWaitForever);
+				BSP_LCD_FillCircle(display.x, display.y, 2);
+				osMutexRelease(myMutex01Handle);
+				loop++;
+				safe_printf("Task 2: %d (got  %3d,%3d)\n", loop, display.x, display.y);
+			}
+			else if((display.y > 3) && (display.y < 47) && // Start
+					(display.x > 3) && (display.x < 128))
+			{
+				osMutexWait(myMutex01Handle, osWaitForever);
 
-			BSP_LCD_SetTextColor(LCD_COLOR_RED);
-			BSP_LCD_FillRect(4, 52, 124, 43); // make origin one more and size both one less
-			HAL_Delay(200);
-			BSP_LCD_SetTextColor(LCD_COLOR_WHITE);
-			BSP_LCD_FillRect(4, 52, 124, 43);
-			BSP_LCD_SetFont(&Font24);
-			BSP_LCD_SetTextColor(LCD_COLOR_BLACK);
-			BSP_LCD_DisplayStringAt(6, 61, (uint8_t*)"Stop",LEFT_MODE); 	// Stop: (3,51)>(128,95)
+				BSP_LCD_SetTextColor(LCD_COLOR_GREEN);
+				BSP_LCD_FillRect(4, 4, 124, 43); // make origin one more and size both one less
+				HAL_Delay(200);
+				BSP_LCD_SetTextColor(LCD_COLOR_WHITE);
+				BSP_LCD_FillRect(4, 4, 124, 43);
+				BSP_LCD_SetFont(&Font24);
+				BSP_LCD_SetTextColor(LCD_COLOR_BLACK);
+				BSP_LCD_DisplayStringAt(6, 13, (uint8_t*)"Start",LEFT_MODE); 	// Start: (3,3)>(128,47)
 
-			start = 0;
+				osMessagePut (myQueue02Handle, 1, 0);
 
-			//osMessagePut(message_analog, start, 0);
+				osMutexRelease(myMutex01Handle);
+			}
+			else if((display.y > 51) && (display.y < 95) && // Stop
+					(display.x > 3) && (display.x < 128))
+			{
+				osMutexWait(myMutex01Handle, osWaitForever);
 
-			//osMessagePut (analogQueue, (uint32_t)(start), 0);
+				BSP_LCD_SetTextColor(LCD_COLOR_RED);
+				BSP_LCD_FillRect(4, 52, 124, 43); // make origin one more and size both one less
+				HAL_Delay(200);
+				BSP_LCD_SetTextColor(LCD_COLOR_WHITE);
+				BSP_LCD_FillRect(4, 52, 124, 43);
+				BSP_LCD_SetFont(&Font24);
+				BSP_LCD_SetTextColor(LCD_COLOR_BLACK);
+				BSP_LCD_DisplayStringAt(6, 61, (uint8_t*)"Stop",LEFT_MODE); 	// Stop: (3,51)>(128,95)
 
-			osMutexRelease(myMutex01Handle);
+				osMessagePut (myQueue02Handle, 0, 0);
+
+				osMutexRelease(myMutex01Handle);
+			}
+			else if((display.y > 99) && (display.y < 143) && // Load
+					(display.x > 3) && (display.x < 128))
+			{
+				osMutexWait(myMutex01Handle, osWaitForever);
+
+				BSP_LCD_SetTextColor(LCD_COLOR_BLUE);
+				BSP_LCD_FillRect(4, 100, 124, 43); // make origin one more and size both one less
+				HAL_Delay(200);
+				BSP_LCD_SetTextColor(LCD_COLOR_WHITE);
+				BSP_LCD_FillRect(4, 100, 124, 43);
+				BSP_LCD_SetFont(&Font24);
+				BSP_LCD_SetTextColor(LCD_COLOR_BLACK);
+				BSP_LCD_DisplayStringAt(6, 109, (uint8_t*)"Load",LEFT_MODE); 	// Load: (3,99)>(128,143)
+
+				osMutexRelease(myMutex01Handle);
+			}
+			else if((display.y > 147) && (display.y < 191) && // Store
+					(display.x > 3) && (display.x < 128))
+			{
+				osMutexWait(myMutex01Handle, osWaitForever);
+
+				BSP_LCD_SetTextColor(LCD_COLOR_MAGENTA);
+				BSP_LCD_FillRect(4, 148, 124, 43); // make origin one more and size both one less
+				HAL_Delay(200);
+				BSP_LCD_SetTextColor(LCD_COLOR_WHITE);
+				BSP_LCD_FillRect(4, 148, 124, 43);
+				BSP_LCD_SetFont(&Font24);
+				BSP_LCD_SetTextColor(LCD_COLOR_BLACK);
+				BSP_LCD_DisplayStringAt(6, 157, (uint8_t*)"Store",LEFT_MODE); // Store: (3,147)>(128,191)
+
+				osMutexRelease(myMutex01Handle);
+			}
+			else if((display.y > 195) && (display.y < 237) && // Debug
+					(display.x > 3) && (display.x < 128))
+			{
+				osMutexWait(myMutex01Handle, osWaitForever);
+
+				BSP_LCD_SetTextColor(LCD_COLOR_BROWN);
+				BSP_LCD_FillRect(4, 196, 124, 41); // make origin one more and size both one less
+				HAL_Delay(200);
+				BSP_LCD_SetTextColor(LCD_COLOR_WHITE);
+				BSP_LCD_FillRect(4, 196, 124, 41);
+				BSP_LCD_SetFont(&Font24);
+				BSP_LCD_SetTextColor(LCD_COLOR_BLACK);
+				BSP_LCD_DisplayStringAt(6, 205, (uint8_t*)"Debug",LEFT_MODE); // Debug: (3,195)>(128,237)
+
+				debug_global = !debug_global;
+				if(debug_global){
+					safe_printf("Debug messages will be displayed\n");
+				}else{
+					safe_printf("Debug messages will not be displayed\n");
+				}
+
+				osMutexRelease(myMutex01Handle);
+			}
+
+		}else{
+
 		}
-    }
-}
+	}
 }
 
 void draw_buttons(){
-	 // Display LED screen layout
-		  // ------------------------------------------------------------------------------
-		  osMutexWait(myMutex01Handle, osWaitForever);
+	// Display LED screen layout
+	// ------------------------------------------------------------------------------
+	osMutexWait(myMutex01Handle, osWaitForever);
 
-		  // Draw rectangles
-		  BSP_LCD_SetTextColor(LCD_COLOR_BLACK);
+	// Draw rectangles
+	BSP_LCD_SetTextColor(LCD_COLOR_BLACK);
 
-		  int xpos = 3;
-		  for(int i = 0; i < 4; i++, xpos += 48){
-			  BSP_LCD_DrawRect(3, xpos, 125, 44);
-		  }
-		  BSP_LCD_DrawRect(3, 195, 125, 42);
+	int xpos = 3;
+	for(int i = 0; i < 4; i++, xpos += 48){
+		BSP_LCD_DrawRect(3, xpos, 125, 44);
+	}
+	BSP_LCD_DrawRect(3, 195, 125, 42);
 
-		  BSP_LCD_DrawRect(132, 3, 185, 189);
-		  BSP_LCD_DrawRect(133, 4, 185, 189);
-		  BSP_LCD_DrawRect(139, 208, 53, 29);
-		  BSP_LCD_DrawRect(196, 208, 53, 29);
-		  BSP_LCD_DrawRect(253, 208, 53, 29);
+	BSP_LCD_DrawRect(132, 3, 185, 189);
+	BSP_LCD_DrawRect(133, 4, 185, 189);
+	BSP_LCD_DrawRect(139, 208, 53, 29);
+	BSP_LCD_DrawRect(196, 208, 53, 29);
+	BSP_LCD_DrawRect(253, 208, 53, 29);
 
-		  // Draw straight lines
-		  // Horizontal
-		  int xypos = 48;
-		  for(int i = 0; i < 4; i++, xypos += 48){
-			  BSP_LCD_DrawHLine(3, xypos, 125);
-		  }
-		  BSP_LCD_DrawHLine(3, 238, 125);
+	// Draw straight lines
+	// Horizontal
+	int xypos = 48;
+	for(int i = 0; i < 4; i++, xypos += 48){
+		BSP_LCD_DrawHLine(3, xypos, 125);
+	}
+	BSP_LCD_DrawHLine(3, 238, 125);
 
-		  BSP_LCD_DrawHLine(139, 238, 54);
-		  BSP_LCD_DrawHLine(196, 238, 54);
-		  BSP_LCD_DrawHLine(253, 238, 54);
+	BSP_LCD_DrawHLine(139, 238, 54);
+	BSP_LCD_DrawHLine(196, 238, 54);
+	BSP_LCD_DrawHLine(253, 238, 54);
 
-		  // Vertical
-		  int y1pos = 3;
-		  for(int i = 0; i < 4; i++, y1pos += 48){
-		  	BSP_LCD_DrawVLine(129, y1pos, 45);
-		  }
-		  BSP_LCD_DrawVLine(129, 195, 43);
+	// Vertical
+	int y1pos = 3;
+	for(int i = 0; i < 4; i++, y1pos += 48){
+		BSP_LCD_DrawVLine(129, y1pos, 45);
+	}
+	BSP_LCD_DrawVLine(129, 195, 43);
 
-		  BSP_LCD_DrawVLine(193, 208, 30);
-		  BSP_LCD_DrawVLine(250, 208, 30);
-		  BSP_LCD_DrawVLine(307, 208, 30);
+	BSP_LCD_DrawVLine(193, 208, 30);
+	BSP_LCD_DrawVLine(250, 208, 30);
+	BSP_LCD_DrawVLine(307, 208, 30);
 
-		  // Write text
-		  BSP_LCD_SetFont(&Font24);
-		  BSP_LCD_DisplayStringAt(6, 13, (uint8_t*)"Start",LEFT_MODE); 	// Start: (3,3)>(128,47)
-		  BSP_LCD_DisplayStringAt(6, 61, (uint8_t*)"Stop",LEFT_MODE); 	// Stop: (3,51)>(128,95)
-		  BSP_LCD_DisplayStringAt(6, 109, (uint8_t*)"Load",LEFT_MODE); 	// Load: (3,99)>(128,143)
-		  BSP_LCD_DisplayStringAt(6, 157, (uint8_t*)"Store",LEFT_MODE); // Store: (3,147)>(128,191)
-		  BSP_LCD_DisplayStringAt(6, 205, (uint8_t*)"Debug",LEFT_MODE); // Debug: (3,195)>(128,237)
+	// Write text
+	BSP_LCD_SetFont(&Font24);
+	BSP_LCD_DisplayStringAt(6, 13, (uint8_t*)"Start",LEFT_MODE); 	// Start: (3,3)>(128,47)
+	BSP_LCD_DisplayStringAt(6, 61, (uint8_t*)"Stop",LEFT_MODE); 	// Stop: (3,51)>(128,95)
+	BSP_LCD_DisplayStringAt(6, 109, (uint8_t*)"Load",LEFT_MODE); 	// Load: (3,99)>(128,143)
+	BSP_LCD_DisplayStringAt(6, 157, (uint8_t*)"Store",LEFT_MODE); // Store: (3,147)>(128,191)
+	BSP_LCD_DisplayStringAt(6, 205, (uint8_t*)"Debug",LEFT_MODE); // Debug: (3,195)>(128,237)
 
-		  BSP_LCD_DisplayStringAt(142, 211, (uint8_t*)"M1",LEFT_MODE); 	// M1: (139,208)>(192,237)
-		  BSP_LCD_DisplayStringAt(199, 211, (uint8_t*)"M2",LEFT_MODE); 	// M2: (196,208)>(249,237)
-		  BSP_LCD_DisplayStringAt(256, 211, (uint8_t*)"M3",LEFT_MODE); 	// M3: (253,208)>(306,237)
+	BSP_LCD_DisplayStringAt(142, 211, (uint8_t*)"M1",LEFT_MODE); 	// M1: (139,208)>(192,237)
+	BSP_LCD_DisplayStringAt(199, 211, (uint8_t*)"M2",LEFT_MODE); 	// M2: (196,208)>(249,237)
+	BSP_LCD_DisplayStringAt(256, 211, (uint8_t*)"M3",LEFT_MODE); 	// M3: (253,208)>(306,237)
 
-		  BSP_LCD_SetFont(&Font12);
-		  BSP_LCD_DisplayStringAt(132, 195, (uint8_t*)"0s",LEFT_MODE); 	// 0s: (132,3)>(317,191)
-		  BSP_LCD_DisplayStringAt(283, 195, (uint8_t*)"10s",LEFT_MODE); // 10s: (133,4)>(318,192)
+	BSP_LCD_SetFont(&Font12);
+	BSP_LCD_DisplayStringAt(132, 195, (uint8_t*)"0s",LEFT_MODE); 	// 0s: (132,3)>(317,191)
+	BSP_LCD_DisplayStringAt(283, 195, (uint8_t*)"10s", LEFT_MODE); // 10s: (133,4)>(318,192)
 
-		  osMutexRelease(myMutex01Handle);
-		  // ------------------------------------------------------------------------------
+	osMutexRelease(myMutex01Handle);
+	// ------------------------------------------------------------------------------
 }
 
 
