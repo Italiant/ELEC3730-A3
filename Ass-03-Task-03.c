@@ -1,10 +1,3 @@
-//     $Date: 2018-05-22 06:24:02 +1000 (Tue, 22 May 2018) $
-// $Revision: 1330 $
-//   $Author: Peter $
-
-#include "Ass-03.h"
-
-//
 // Task that reads input from the front panel display. It uses a timer
 // to periodically signal the task to check if the touch panel is being
 // pressed. If it has, the position location is put onto a message queue.
@@ -19,10 +12,17 @@
 // being pressed rather than the position on the front panel. Can also improve
 // the setting of the DEBOUNCE_COUNT limit
 
+//--------------------- Includes ---------------------
+#include "Ass-03.h"
+
 // The number of times to register the front panel as being pressed
 #define ON_COUNT   1
 #define OFF_COUNT 20
 
+//--------------------- Initial Function ---------------------
+//Function: Get Touch Point
+//Input:
+//Result: Updates display coordinates x and y
 uint8_t getfp(Coordinate *display)
 {
 	osEvent event;
@@ -40,6 +40,7 @@ uint8_t getfp(Coordinate *display)
     }
 }
 
+//--------------------- Task 3: Main ---------------------
 void Ass_03_Task_03(void const * argument)
 {
 	int8_t pressed_count=ON_COUNT;  // Debounce counter (not pressed)
