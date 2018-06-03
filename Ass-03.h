@@ -1,7 +1,3 @@
-//     $Date: 2018-05-22 06:24:02 +1000 (Tue, 22 May 2018) $
-// $Revision: 1330 $
-//   $Author: Peter $
-
 // Assignment 3 include file
 
 #ifndef ASS_03_H_
@@ -38,9 +34,12 @@ extern osSemaphoreId myBinarySem03Handle;
 extern osSemaphoreId myBinarySem04Handle;
 extern osSemaphoreId myBinarySem05Handle;
 extern osSemaphoreId myBinarySem06Handle;
+// Put message queues here
+// -----------------------------------------------
 extern osMessageQId myQueue01Handle;
 extern osMessageQId myQueue02Handle;
 extern osMessageQId myQueue03Handle;
+// -----------------------------------------------
 extern osMutexId myMutex01Handle; // Protect LCD
 extern osMutexId myMutex02Handle; // Protect console output
 
