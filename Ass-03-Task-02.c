@@ -87,7 +87,7 @@ void Ass_03_Task_02(void const * argument)
 					BSP_LCD_SetTextColor(LCD_COLOR_BLACK);
 					BSP_LCD_DisplayStringAt(6, 13, (uint8_t*)"Start",LEFT_MODE); 	// Start: (3,3)>(128,47)
 
-					osMessagePut (myQueue02Handle, 1, 0);
+					osMessagePut (myQueue02Handle, 1, 0); // Sends message to task 4 start the plotting the graph
 
 					osMutexRelease(myMutex01Handle);
 				}
@@ -105,7 +105,7 @@ void Ass_03_Task_02(void const * argument)
 					BSP_LCD_SetTextColor(LCD_COLOR_BLACK);
 					BSP_LCD_DisplayStringAt(6, 61, (uint8_t*)"Stop",LEFT_MODE); 	// Stop: (3,51)>(128,95)
 
-					osMessagePut (myQueue02Handle, 0, 0);
+					osMessagePut (myQueue02Handle, 0, 0); // Sends message to task 4 stop the plotting the graph
 
 					osMutexRelease(myMutex01Handle);
 				}
