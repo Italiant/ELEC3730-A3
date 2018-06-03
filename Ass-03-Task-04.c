@@ -1,9 +1,3 @@
-//     $Date: 2018-05-22 06:24:02 +1000 (Tue, 22 May 2018) $
-// $Revision: 1330 $
-//   $Author: Peter $
-
-#include "Ass-03.h"
-
 // This is the task that reads the analog input. A buffer is divided in two to
 // allow working on one half of the buffer while the other half is being
 // loaded using the DMA controller.
@@ -14,10 +8,15 @@
 //
 // Note that there needs to be a way of starting and stopping the display.
 
-uint16_t ADC_Value[1000];
+//--------------------- Includes ---------------------
+#include "Ass-03.h"
 
+uint16_t ADC_Value[1000]; // Needs explanation, does not change graph scale
+
+//--------------------- Task 4: Main ---------------------
 void Ass_03_Task_04(void const * argument)
 {
+	// Declare variables
 	uint16_t i;
 	HAL_StatusTypeDef status;
 	uint16_t xpos=0;
@@ -29,18 +28,15 @@ void Ass_03_Task_04(void const * argument)
 	uint32_t start = 1;
 	uint32_t analog;
 
-#define XOFF 134
-#define YOFF 5
-#define XSIZE 182
-#define YSIZE 188
+	// Defines coordinates for graph reagion
+	#define XOFF 134
+	#define YOFF 5
+	#define XSIZE 182
+	#define YSIZE 188
 
+	// Waits for signal from task 1 to start
 	osSignalWait(1,osWaitForever);
 	safe_printf("Hello from Task 4 - Analog Input (turn ADC knob or use pulse sensor)\n");
-
-	// Draw a box to plot in
-	/* osMutexWait(myMutex01Handle, osWaitForever);
-  BSP_LCD_DrawRect(XOFF-1,YOFF-1,XSIZE+1,YSIZE+1);
-  osMutexRelease(myMutex01Handle);*/
 
 	// Start the conversion process
 	status = HAL_ADC_Start_DMA(&hadc1, (uint32_t *)&ADC_Value, 1000);
@@ -54,12 +50,14 @@ void Ass_03_Task_04(void const * argument)
 	// Start main loop
 	while (1)
 	{
+		// Wait for message from task 2 to start and stop plotting the graph
 		event1 = osMessageGet(myQueue02Handle, 5);
 		if (event1.status == osEventMessage)
 		{
 			start = event1.value.v;
 		}
 
+		// Wait for message from task 2 to recieve analog input... TODO: use this updated value to change graph scale
 		event2 = osMessageGet(myQueue03Handle, 5);
 		if (event2.status == osEventMessage)
 		{
@@ -67,7 +65,7 @@ void Ass_03_Task_04(void const * argument)
 			safe_printf("Plotting time changed to (%d)s\n", analog);
 		}
 
-		if(start == 1){
+		if(start == 1){ // Used to start and stop plotting the graph
 
 			// Wait for first half of buffer
 			osSemaphoreWait(myBinarySem05Handle, osWaitForever);
@@ -117,12 +115,12 @@ void Ass_03_Task_04(void const * argument)
 
 		}
 		else{
-
+		// If start is = 0 then do not plot the graph, pause it 
 		}
 	}
 }
 
-// STEPIEN: Add callback functions to see if this can be used for double buffering equivalent
+// Add callback functions to see if this can be used for double buffering equivalent, dont know wtf these do
 
 void HAL_ADC_ConvHalfCpltCallback(ADC_HandleTypeDef* hadc)
 {
