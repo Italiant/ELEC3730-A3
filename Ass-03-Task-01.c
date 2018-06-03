@@ -1,10 +1,3 @@
-//     $Date: 2018-05-22 06:24:02 +1000 (Tue, 22 May 2018) $
-// $Revision: 1330 $
-//   $Author: Peter $
-
-#include "Ass-03.h"
-#include <stdlib.h>
-
 // This is the console task. Can use your code from the previous assignment
 // and expand.
 //
@@ -14,15 +7,20 @@
 //
 // *** MAKE UPDATES TO THE CODE AS REQUIRED ***
 //
+//--------------------- Includes ---------------------
+#include "Ass-03.h"
+#include <stdlib.h>
 
-uint8_t myReadFile();
-uint8_t myWriteFile();
+// --------------------- Function Headers ---------------------
+//uint8_t myReadFile();
+//uint8_t myWriteFile();
 int string_parser(uint8_t *inp, uint8_t **array_of_words_p[]);
-int debug(int *debug, uint8_t** string);
+int debug(int *debug);
 int analog_f(int *analog, uint8_t** string);
-int ls_f(uint8_t** string);
+int ls_f();
 FRESULT scan_files(char* path);
 
+// --------------------- File & Global Variables ---------------------
 FIL MyFile;
 FIL MyFile2, MyFile3;
 FRESULT Status;
@@ -30,12 +28,13 @@ int analog_global = 10;
 int flag = 0;
 int debug_global;
 
+// --------------------- Task 1: Main ---------------------
 void Ass_03_Task_01(void const * argument)
 {
 	safe_printf("Hello from Task 1 - Console (serial input)\n");
 	safe_printf("INFO: Initialise LCD and TP first...\n");
 
-	// STEPIEN: Initialize and turn on LCD and calibrate the touch panel
+	// Initialize and turn on LCD, calibrate the touch panel and change colour to white
 	BSP_LCD_Init();
 	BSP_LCD_DisplayOn();
 	BSP_TP_Init();
@@ -46,61 +45,77 @@ void Ass_03_Task_01(void const * argument)
 	osSignalSet(myTask03Handle, 1);
 	osSignalSet(myTask04Handle, 1);
 
-	//Coordinate display;
-	uint8_t **strs;
+	// Declaring variables
+	uint8_t **strs; // Array to store the input string divided up into arguments
 	uint8_t c;
-	uint8_t* input1 = (uint8_t*)malloc(sizeof(uint8_t)*20);
+	uint8_t* input1 = (uint8_t*)malloc(sizeof(uint8_t)*20); // Array to store the input characters
 	int pos = 0;
 	int words = 0;
 	int debug1 = 0;
 	int analog = 10;
 
+	// Must stay in while loop forever for synchronous tasks to work together
 	while (1)
 	{
-		debug1 = debug_global;
+		debug1 = debug_global; // Synchronize local debug to global one if changed
 
+		// Get input from console via getchar();
 		safe_printf(">");
 		c = getchar();
 		input1[pos] = c;
 
-		if(input1[pos] == '\r'){
-			input1[pos] = '\0';
-			safe_printf("Input String = %s\n", input1);
-			words = string_parser(input1, &strs);
+		// If enter key is pressed
+		if(input1[pos] == '\r'){ // \r is \n in putty
+			input1[pos] = '\0'; // Set last position to NULL
+			safe_printf("Input String = %s\n", input1); // Print out inputted string
+			words = string_parser(input1, &strs); // Send input character array to string parser function
 
-			safe_printf("> %s\n", input1);
-			safe_printf("Count	: %d\n", words);
-			for(int j = 0; j < words; j++){ // prints out words
-				safe_printf("Word(%d)	: %s\n", j, strs[j]);
+			// Display words entered if debug is pressed
+			if(debug){
+				safe_printf("> %s\n", input1);
+				safe_printf("Count	: %d\n", words);
+				for(int j = 0; j < words; j++){ // prints out words
+					safe_printf("Word(%d)	: %s\n", j, strs[j]);
+				}
 			}
-			pos = 0;
-
+			pos = 0; // Resets position for next character string
+			
+			// Argument checks
+			// Debug -> Turns debugging on or off
 			if(strcmp((const char *)strs[0], "debug") == 0){
-				debug(&debug1, strs);
+				debug(&debug1);
 				debug_global = debug1;
 				//safe_printf("Debug is %d\n", debug1);
 			}
+			// Analog <time> -> Changes scale of plotting graph
 			else if(strcmp((const char *)strs[0], "analog") == 0){
 				analog_f(&analog, strs);
 				analog_global = analog;
 				osMessagePut (myQueue03Handle, analog, 0);
 				flag = 1;
 			}
+			ls -> List contents of current directory folder
 			else if(strcmp((const char *)strs[0], "ls") == 0){
-				ls_f(strs);
+				ls_f();
 			}
-
 			//myReadFile();
 			//myWriteFile();
+			
+		// Else if enter key is not pressed
 		}else{
 			safe_printf("%c", input1[pos]);
-			pos++;
+			pos++; // Increace position
 		}
 	}
 
 }
 
-int ls_f(uint8_t** string){
+// --------------------- Functions ---------------------
+
+// Function: List Directory Contents
+// Input: 
+// Result: 
+int ls_f(){
 	FATFS fs;
 	FRESULT res;
 	char buff[256];
@@ -112,6 +127,9 @@ int ls_f(uint8_t** string){
 	return 0;
 }
 
+// Function: Scan Files
+// Input: A valid char pointer to the directory path
+// Result: Lists the contents of the specified path
 FRESULT scan_files(char* path){
 	FRESULT res;
 	DIR dir;
@@ -147,6 +165,9 @@ FRESULT scan_files(char* path){
 	return res;
 }
 
+// Function: Plot Analog Input
+// Input: 
+// Result: 
 int analog_f(int *analog, uint8_t** string){
 	int number;
 	char *pnt;
@@ -175,7 +196,10 @@ int analog_f(int *analog, uint8_t** string){
 	return 0;
 }
 
-int debug(int *debug, uint8_t** string){
+// Function: Debug
+// Input: 
+// Result: 
+int debug(int *debug){
 	int ret;
 		*debug = !*debug;
 		if(*debug){
@@ -188,6 +212,9 @@ int debug(int *debug, uint8_t** string){
 	return ret;
 }
 
+// Function: String Parser
+// Input: 
+// Result: 
 int string_parser(uint8_t *inp, uint8_t **array_of_words_p[]){
 
 	int string_length = 0;
@@ -265,6 +292,10 @@ int string_parser(uint8_t *inp, uint8_t **array_of_words_p[]){
 
 }
 
+/*
+// Function: Read File
+// Input: 
+// Result: 
 uint8_t myReadFile()
 {
 #define READ_FILE "Hello.txt"
@@ -297,6 +328,9 @@ uint8_t myReadFile()
 	return 0;
 }
 
+// Function: Write File
+// Input: 
+// Result: 
 uint8_t myWriteFile()
 {
 #define WRITE_FILE "There.txt"
@@ -323,6 +357,6 @@ uint8_t myWriteFile()
 	// Close file
 	f_close(&MyFile);
 
-
 	return 0;
 }
+*/
