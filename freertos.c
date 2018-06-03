@@ -63,13 +63,18 @@ osThreadId defaultTaskHandle;
 osThreadId myTask02Handle;
 osThreadId myTask03Handle;
 osThreadId myTask04Handle;
+// Put message queues here
+// -----------------------------------------------
 osMessageQId myQueue01Handle;
 osMessageQId myQueue02Handle;
 osMessageQId myQueue03Handle;
+// -----------------------------------------------
 osTimerId myTimer01Handle;
+
 osMutexId myMutex01Handle;
 osMutexId myMutex02Handle;
 osMutexId myMutex03Handle;
+
 osSemaphoreId myBinarySem01Handle;
 osSemaphoreId myBinarySem02Handle;
 osSemaphoreId myBinarySem03Handle;
@@ -191,8 +196,8 @@ void MX_FREERTOS_Init(void) {
   /* add threads, ... */
   /* USER CODE END RTOS_THREADS */
 
-  /* Create the queue(s) */
-  /* definition and creation of myQueue01 */
+ // Put message queues here
+ // ----------------------------------------------------------------------------
   osMessageQDef(myQueue01, 4, uint32_t);
   myQueue01Handle = osMessageCreate(osMessageQ(myQueue01), NULL);
 
@@ -201,6 +206,7 @@ void MX_FREERTOS_Init(void) {
 
   osMessageQDef(myQueue03, 4, uint32_t);
   myQueue03Handle = osMessageCreate(osMessageQ(myQueue03), NULL);
+ // ----------------------------------------------------------------------------
 
   /* USER CODE BEGIN RTOS_QUEUES */
   /* add queues, ... */
