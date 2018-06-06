@@ -41,23 +41,6 @@ void Ass_03_Task_02(void const * argument)
 	// Must stay in this while loop to work
 	while (1)
 	{
-		// This does not work atm:
-		// Currently: updates scale number on screen when touch pannel is pressed
-		// TODO: update screen anytime not just wait till screen is pressed
-		if(flag == 1){
-			osMutexWait(myMutex01Handle, osWaitForever);
-
-			BSP_LCD_SetTextColor(LCD_COLOR_BLACK);
-			BSP_LCD_SetFont(&Font12);
-			uint8_t buffer[10]; // Buffer string
-			sprintf((char *)buffer, "%d", analog_global);
-			BSP_LCD_DisplayStringAt(283, 195, buffer, LEFT_MODE); // 10s: (133,4)>(318,192)
-			BSP_LCD_DisplayStringAt(307, 195, (uint8_t*)"s", LEFT_MODE); // 10s: (133,4)>(318,192)
-			flag = 0;
-
-			osMutexRelease(myMutex01Handle);
-		}
-
 		// If touched in this area... Do this... for all of the following statements
 		if (getfp(&display) == 0)
 		{
