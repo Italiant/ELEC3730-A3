@@ -16,7 +16,7 @@
 //uint8_t myWriteFile();
 int string_parser(uint8_t *inp, uint8_t **array_of_words_p[]);
 int debug(int *debug);
-int analog_f(int *analog, uint8_t** string);
+int analog_f(int *analog, uint8_t** string, int debug2);
 int ls_f();
 FRESULT scan_files(char* path);
 
@@ -53,25 +53,26 @@ void Ass_03_Task_01(void const * argument)
 	int words = 0;
 	int debug1 = 0;
 	int analog = 10;
-
+	safe_printf(">");
 	// Must stay in while loop forever for synchronous tasks to work together
 	while (1)
 	{
 		debug1 = debug_global; // Synchronize local debug to global one if changed
 
 		// Get input from console via getchar();
-		safe_printf(">");
 		c = getchar();
 		input1[pos] = c;
 
 		// If enter key is pressed
 		if(input1[pos] == '\r'){ // \r is \n in putty
 			input1[pos] = '\0'; // Set last position to NULL
-			safe_printf("Input String = %s\n", input1); // Print out inputted string
+			if(debug1){
+				safe_printf("\nInput String = %s\n", input1); // Print out inputted string
+			}
 			words = string_parser(input1, &strs); // Send input character array to string parser function
 
 			// Display words entered if debug is pressed
-			if(debug){
+			if(debug1){
 				safe_printf("> %s\n", input1);
 				safe_printf("Count	: %d\n", words);
 				for(int j = 0; j < words; j++){ // prints out words
@@ -79,31 +80,29 @@ void Ass_03_Task_01(void const * argument)
 				}
 			}
 			pos = 0; // Resets position for next character string
-			
+
 			// Argument checks
 			// Debug -> Turns debugging on or off
-			if(strcmp((const char *)strs[0], "debug") == 0){
+			if((strcmp((const char *)strs[0], "debug") == 0) && words == 1){
 				debug(&debug1);
 				debug_global = debug1;
 				//safe_printf("Debug is %d\n", debug1);
 			}
 			// Analog <time> -> Changes scale of plotting graph
-			else if(strcmp((const char *)strs[0], "analog") == 0){
-				analog_f(&analog, strs);
-				analog_global = analog;
+			else if((strcmp((const char *)strs[0], "analog") == 0) && words > 1){
+				analog_f(&analog, strs, debug1);
 				osMessagePut (myQueue03Handle, analog, 0);
-				flag = 1;
 			}
-			ls -> List contents of current directory folder
-			else if(strcmp((const char *)strs[0], "ls") == 0){
+			// ls -> List contents of current directory folder
+			else if((strcmp((const char *)strs[0], "ls") == 0) && words == 1){
 				ls_f();
 			}
 			//myReadFile();
 			//myWriteFile();
-			
-		// Else if enter key is not pressed
+			safe_printf(">");
+			// Else if enter key is not pressed
 		}else{
-			safe_printf("%c", input1[pos]);
+			safe_printf("Got(%c)\n", c);
 			pos++; // Increace position
 		}
 	}
@@ -119,11 +118,11 @@ int ls_f(){
 	FATFS fs;
 	FRESULT res;
 	char buff[256];
-		res = f_mount(&fs, "", 1);
-		if (res == FR_OK) {
-			strcpy(buff, "/");
-			res = scan_files(buff);
-		}
+	res = f_mount(&fs, "", 1);
+	if (res == FR_OK) {
+		strcpy(buff, "/");
+		res = scan_files(buff);
+	}
 	return 0;
 }
 
@@ -168,30 +167,39 @@ FRESULT scan_files(char* path){
 // Function: Plot Analog Input
 // Input: 
 // Result: 
-int analog_f(int *analog, uint8_t** string){
+int analog_f(int *analog, uint8_t** string, int debug2){
 	int number;
 	char *pnt;
 	int pre;
 	int error = 0;
+	strtod((const char *)string[1], &pnt);
+	if(*pnt != 0){
+		safe_printf("ERROR: Number conversion unsuccessful\n");
+		error = 1;
+	}
+	if(*analog < 0){
+		safe_printf("ERROR: Number must be positive\n");
+		error = 1;
+	}
+	else if (error == 0){
+		number = atoi((const char *)string[1]);
+		pre = *analog;
+		*analog = number;
+		if(debug2){
+			safe_printf("Plotting time changed from (%d)s to (%d)s\n", pre, *analog);
+		}
+		osMutexWait(myMutex01Handle, osWaitForever);
 
-	if(string[1] == '\0'){
+		BSP_LCD_SetTextColor(LCD_COLOR_WHITE);
+		BSP_LCD_FillRect(225, 195, 93, 12);
+		BSP_LCD_SetTextColor(LCD_COLOR_BLACK);
+		BSP_LCD_SetFont(&Font12);
+		uint8_t buffer[10]; // Buffer string
+		sprintf((char *)buffer, "%d", *analog);
+		BSP_LCD_DisplayStringAt(306, 195, buffer, RIGHT_MODE); // 10s: (133,4)>(318,192)
+		BSP_LCD_DisplayStringAt(307, 195, (uint8_t*)"s", LEFT_MODE); // 10s: (133,4)>(318,192)
 
-	}else{
-			strtod((const char *)string[1], &pnt);
-			if(*pnt != 0){
-				safe_printf("ERROR: Number conversion unsuccessful\n");
-				error = 1;
-			}
-			if(*analog < 0){
-				safe_printf("ERROR: Number must be positive\n");
-				error = 1;
-			}
-			else if (error == 0){
-				number = atoi((const char *)string[1]);
-				pre = *analog;
-				*analog = number;
-				safe_printf("Plotting time changed from (%d)s to (%d)s\n", pre, *analog);
-			}
+		osMutexRelease(myMutex01Handle);
 	}
 	return 0;
 }
@@ -201,14 +209,14 @@ int analog_f(int *analog, uint8_t** string){
 // Result: 
 int debug(int *debug){
 	int ret;
-		*debug = !*debug;
-		if(*debug){
-			ret = 1;
-			safe_printf("Debug messages will be displayed\n");
-		}else{
-			safe_printf("Debug messages will not be displayed\n");
-			ret = 0;
-		}
+	*debug = !*debug;
+	if(*debug){
+		ret = 1;
+		safe_printf("Debug messages will be displayed\n");
+	}else{
+		safe_printf("Debug messages will not be displayed\n");
+		ret = 0;
+	}
 	return ret;
 }
 
@@ -359,4 +367,4 @@ uint8_t myWriteFile()
 
 	return 0;
 }
-*/
+ */
