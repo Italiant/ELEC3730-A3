@@ -23,16 +23,19 @@ void Ass_03_Task_04(void const * argument)
 	uint16_t ypos=0;
 	uint16_t last_xpos=0;
 	uint16_t last_ypos=0;
+	int analog_pre = 10;
 
 	// osEvent event;
 	uint32_t start = 1;
-	uint32_t analog;
+	uint32_t analog = 10;
+	uint32_t *buff;
+	char *ptr;
 
-	// Defines coordinates for graph reagion
-	#define XOFF 134
-	#define YOFF 5
-	#define XSIZE 182
-	#define YSIZE 188
+	// Defines coordinates for graph region
+#define XOFF 134
+#define YOFF 5
+#define XSIZE 182
+#define YSIZE 187
 
 	// Waits for signal from task 1 to start
 	osSignalWait(1,osWaitForever);
@@ -55,6 +58,11 @@ void Ass_03_Task_04(void const * argument)
 		if (event1.status == osEventMessage)
 		{
 			start = event1.value.v;
+			if(start){
+				safe_printf("Plotting graph\n");
+			}else{
+				safe_printf("Stopped plotting graph\n");
+			}
 		}
 
 		// Wait for message from task 2 to recieve analog input... TODO: use this updated value to change graph scale
@@ -62,10 +70,17 @@ void Ass_03_Task_04(void const * argument)
 		if (event2.status == osEventMessage)
 		{
 			analog = event2.value.v;
+
 			safe_printf("Plotting time changed to (%d)s\n", analog);
 		}
-
-		if(start == 1){ // Used to start and stop plotting the graph
+			buff = analog;
+		double a = atof(buff);
+		safe_printf("a - %f\n", a);
+		a = 10/a;
+		safe_printf("a - %f\n", a);
+		sprintf(buff, "%d", a);
+		safe_printf("buff - %d\n", buff);
+		if(start){ // Used to start and stop plotting the graph
 
 			// Wait for first half of buffer
 			osSemaphoreWait(myBinarySem05Handle, osWaitForever);
@@ -80,7 +95,7 @@ void Ass_03_Task_04(void const * argument)
 				// BSP_LCD_FillRect(xpos,ypos,1,1);
 				last_xpos=xpos;
 				last_ypos=ypos;
-				xpos++;
+				xpos += buff;
 			}
 			osMutexRelease(myMutex01Handle);
 			if (last_xpos>=XSIZE-1)
@@ -103,7 +118,7 @@ void Ass_03_Task_04(void const * argument)
 				// BSP_LCD_FillCircle(xpos,ypos,2);
 				last_xpos=xpos;
 				last_ypos=ypos;
-				xpos++;
+				xpos += buff;
 			}
 			osMutexRelease(myMutex01Handle);
 			if (last_xpos>=XSIZE-1)
@@ -115,7 +130,7 @@ void Ass_03_Task_04(void const * argument)
 
 		}
 		else{
-		// If start is = 0 then do not plot the graph, pause it 
+			// If start is = 0 then do not plot the graph, pause it
 		}
 	}
 }
