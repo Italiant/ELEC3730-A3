@@ -18,6 +18,8 @@ void Ass_03_Task_04(void const * argument)
 {
 	// Declare variables
 	uint16_t i;
+	uint16_t data[200];
+	uint16_t data_s = 0;
 	HAL_StatusTypeDef status;
 	uint16_t xpos=0;
 	uint16_t ypos=0;
@@ -48,7 +50,7 @@ void Ass_03_Task_04(void const * argument)
 		safe_printf("ERROR: Task 4 HAL_ADC_Start_DMA() %d\n", status);
 	}
 
-	osEvent event1, event2;
+	osEvent event1, event2, event3;
 
 	// Start main loop
 	while (1)
@@ -73,13 +75,25 @@ void Ass_03_Task_04(void const * argument)
 
 			safe_printf("Plotting time changed to (%d)s\n", analog);
 		}
-			buff = analog;
+		buff = analog;
 		double a = atof(buff);
-		safe_printf("a - %f\n", a);
+		//safe_printf("a - %f\n", a);
 		a = 10/a;
-		safe_printf("a - %f\n", a);
+		//safe_printf("a - %f\n", a);
 		sprintf(buff, "%d", a);
-		safe_printf("buff - %d\n", buff);
+		//safe_printf("buff - %d\n", buff);
+
+		event3 = osMessageGet(myQueue05Handle, 5);
+		if (event1.status == osEventMessage)
+		{
+			data_s = event1.value.v;
+			if(data_s){
+				osMessagePut (myQueue04Handle, data, 0);
+			}
+		}
+
+
+
 		if(start){ // Used to start and stop plotting the graph
 
 			// Wait for first half of buffer
@@ -95,7 +109,9 @@ void Ass_03_Task_04(void const * argument)
 				// BSP_LCD_FillRect(xpos,ypos,1,1);
 				last_xpos=xpos;
 				last_ypos=ypos;
-				xpos += buff;
+				data[xpos] = ypos;
+				//osMessagePut (myQueue04Handle, data[xpos], 0);
+				xpos += 1;
 			}
 			osMutexRelease(myMutex01Handle);
 			if (last_xpos>=XSIZE-1)
@@ -118,7 +134,9 @@ void Ass_03_Task_04(void const * argument)
 				// BSP_LCD_FillCircle(xpos,ypos,2);
 				last_xpos=xpos;
 				last_ypos=ypos;
-				xpos += buff;
+				data[xpos] = ypos;
+				//osMessagePut (myQueue04Handle, data[xpos], 0);
+				xpos += 1;
 			}
 			osMutexRelease(myMutex01Handle);
 			if (last_xpos>=XSIZE-1)
