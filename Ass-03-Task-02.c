@@ -55,7 +55,7 @@ void Ass_03_Task_02(void const * argument)
 				safe_printf("Task 2: %d (got  %3d,%3d)\n", loop, display.x, display.y);
 			}
 			else if((display.x > 3) && (display.x < 128)){
-			
+
 				// --------------------- Start --------------------- 
 				if((display.y > 3) && (display.y < 47))
 				{
@@ -147,9 +147,58 @@ void Ass_03_Task_02(void const * argument)
 
 					osMutexRelease(myMutex01Handle);
 				}
+			}else if((display.y >= 208) && (display.y <= 238)){
+				// --------------------- M1 ---------------------
+				if((display.x > 139) && (display.x < 193))
+				{
+					osMutexWait(myMutex01Handle, osWaitForever);
+
+					BSP_LCD_SetTextColor(LCD_COLOR_YELLOW);
+					BSP_LCD_FillRect(140, 209, 51, 27); // make origin one more and size both one less
+					HAL_Delay(200);
+					BSP_LCD_SetTextColor(LCD_COLOR_WHITE);
+					BSP_LCD_FillRect(140, 209, 51, 27);
+					BSP_LCD_SetFont(&Font24);
+					BSP_LCD_SetTextColor(LCD_COLOR_BLACK);
+					BSP_LCD_DisplayStringAt(142, 211, (uint8_t*)"M1",LEFT_MODE);
+
+					osMutexRelease(myMutex01Handle);
+				}
+				// --------------------- M2 ---------------------
+				else if((display.x > 197) && (display.x < 248))
+				{
+					osMutexWait(myMutex01Handle, osWaitForever);
+
+					BSP_LCD_SetTextColor(LCD_COLOR_YELLOW);
+					BSP_LCD_FillRect(197, 209, 51, 27); // make origin one more and size both one less
+					HAL_Delay(200);
+					BSP_LCD_SetTextColor(LCD_COLOR_WHITE);
+					BSP_LCD_FillRect(198, 209, 51, 27);
+					BSP_LCD_SetFont(&Font24);
+					BSP_LCD_SetTextColor(LCD_COLOR_BLACK);
+					BSP_LCD_DisplayStringAt(199, 211, (uint8_t*)"M2",LEFT_MODE); 	// M2: (196,208)>(249,237)
+
+					osMutexRelease(myMutex01Handle);
+				}
+				// --------------------- M3 ---------------------
+				else if((display.x > 254) && (display.x < 305))
+				{
+					osMutexWait(myMutex01Handle, osWaitForever);
+
+					BSP_LCD_SetTextColor(LCD_COLOR_YELLOW);
+					BSP_LCD_FillRect(254, 209, 51, 27); // make origin one more and size both one less
+					HAL_Delay(200);
+					BSP_LCD_SetTextColor(LCD_COLOR_WHITE);
+					BSP_LCD_FillRect(254, 209, 51, 27);
+					BSP_LCD_SetFont(&Font24);
+					BSP_LCD_SetTextColor(LCD_COLOR_BLACK);
+					BSP_LCD_DisplayStringAt(256, 211, (uint8_t*)"M3",LEFT_MODE); 	// M3: (253,208)>(306,237)
+
+					osMutexRelease(myMutex01Handle);
+				}
 			}
 		}else{
-		// For now... do nothing if touch screen is not pressed, pretty sure this is not a fix for above problem
+			// For now... do nothing if touch screen is not pressed, pretty sure this is not a fix for above problem
 		}
 	}
 }
