@@ -68,6 +68,8 @@ osThreadId myTask04Handle;
 osMessageQId myQueue01Handle;
 osMessageQId myQueue02Handle;
 osMessageQId myQueue03Handle;
+osMessageQId myQueue04Handle;
+osMessageQId myQueue05Handle;
 // -----------------------------------------------
 osTimerId myTimer01Handle;
 
@@ -206,6 +208,12 @@ void MX_FREERTOS_Init(void) {
 
   osMessageQDef(myQueue03, 4, uint32_t);
   myQueue03Handle = osMessageCreate(osMessageQ(myQueue03), NULL);
+
+  osMessageQDef(myQueue04, 4, uint32_t);
+  myQueue04Handle = osMessageCreate(osMessageQ(myQueue04), NULL);
+
+  osMessageQDef(myQueue05, 4, uint32_t);
+  myQueue05Handle = osMessageCreate(osMessageQ(myQueue05), NULL);
  // ----------------------------------------------------------------------------
 
   /* USER CODE BEGIN RTOS_QUEUES */
