@@ -12,6 +12,8 @@
 
 //--------------------- Function Headers ---------------------
 void draw_buttons();
+//uint8_t myWriteFile(uint16_t *data, int M1);
+//uint8_t test(int M1);
 
 //--------------------- Defines ---------------------
 #define XOFF 134
@@ -23,6 +25,7 @@ void draw_buttons();
 int analog_global;
 int flag;
 int debug_global = 0;
+int M = 0;
 
 //--------------------- Task 2: Main ---------------------
 void Ass_03_Task_02(void const * argument)
@@ -31,6 +34,10 @@ void Ass_03_Task_02(void const * argument)
 	int loop=0;
 	uint32_t start = 1;
 	Coordinate display;
+
+	osEvent event;
+	uint16_t *data_task2;
+
 
 	// Wait for signal from task 1 to start
 	osSignalWait(1,osWaitForever);
@@ -123,6 +130,9 @@ void Ass_03_Task_02(void const * argument)
 					BSP_LCD_DisplayStringAt(6, 157, (uint8_t*)"Store",LEFT_MODE); // Store: (3,147)>(128,191)
 
 					osMutexRelease(myMutex01Handle);
+
+					osMessagePut(myQueue04Handle, M, 0);
+
 				}
 				// --------------------- Debug --------------------- 
 				else if((display.y > 195) && (display.y < 237))
@@ -155,14 +165,25 @@ void Ass_03_Task_02(void const * argument)
 
 					BSP_LCD_SetTextColor(LCD_COLOR_YELLOW);
 					BSP_LCD_FillRect(140, 209, 51, 27); // make origin one more and size both one less
-					HAL_Delay(200);
-					BSP_LCD_SetTextColor(LCD_COLOR_WHITE);
-					BSP_LCD_FillRect(140, 209, 51, 27);
 					BSP_LCD_SetFont(&Font24);
 					BSP_LCD_SetTextColor(LCD_COLOR_BLACK);
 					BSP_LCD_DisplayStringAt(142, 211, (uint8_t*)"M1",LEFT_MODE);
 
+					BSP_LCD_SetTextColor(LCD_COLOR_WHITE);
+					BSP_LCD_FillRect(198, 209, 51, 27);
+					BSP_LCD_SetFont(&Font24);
+					BSP_LCD_SetTextColor(LCD_COLOR_BLACK);
+					BSP_LCD_DisplayStringAt(199, 211, (uint8_t*)"M2",LEFT_MODE); 	// M2: (196,208)>(249,237)
+
+					BSP_LCD_SetTextColor(LCD_COLOR_WHITE);
+					BSP_LCD_FillRect(254, 209, 51, 27);
+					BSP_LCD_SetFont(&Font24);
+					BSP_LCD_SetTextColor(LCD_COLOR_BLACK);
+					BSP_LCD_DisplayStringAt(256, 211, (uint8_t*)"M3",LEFT_MODE); 	// M3: (253,208)>(306,237)
+
 					osMutexRelease(myMutex01Handle);
+
+					M = 1;
 				}
 				// --------------------- M2 ---------------------
 				else if((display.x > 197) && (display.x < 248))
@@ -171,14 +192,25 @@ void Ass_03_Task_02(void const * argument)
 
 					BSP_LCD_SetTextColor(LCD_COLOR_YELLOW);
 					BSP_LCD_FillRect(197, 209, 51, 27); // make origin one more and size both one less
-					HAL_Delay(200);
-					BSP_LCD_SetTextColor(LCD_COLOR_WHITE);
-					BSP_LCD_FillRect(198, 209, 51, 27);
 					BSP_LCD_SetFont(&Font24);
 					BSP_LCD_SetTextColor(LCD_COLOR_BLACK);
 					BSP_LCD_DisplayStringAt(199, 211, (uint8_t*)"M2",LEFT_MODE); 	// M2: (196,208)>(249,237)
 
+					BSP_LCD_SetTextColor(LCD_COLOR_WHITE);
+					BSP_LCD_FillRect(140, 209, 51, 27);
+					BSP_LCD_SetFont(&Font24);
+					BSP_LCD_SetTextColor(LCD_COLOR_BLACK);
+					BSP_LCD_DisplayStringAt(142, 211, (uint8_t*)"M1",LEFT_MODE);
+
+					BSP_LCD_SetTextColor(LCD_COLOR_WHITE);
+					BSP_LCD_FillRect(254, 209, 51, 27);
+					BSP_LCD_SetFont(&Font24);
+					BSP_LCD_SetTextColor(LCD_COLOR_BLACK);
+					BSP_LCD_DisplayStringAt(256, 211, (uint8_t*)"M3",LEFT_MODE); 	// M3: (253,208)>(306,237)
+
 					osMutexRelease(myMutex01Handle);
+
+					M = 2;
 				}
 				// --------------------- M3 ---------------------
 				else if((display.x > 254) && (display.x < 305))
@@ -187,14 +219,25 @@ void Ass_03_Task_02(void const * argument)
 
 					BSP_LCD_SetTextColor(LCD_COLOR_YELLOW);
 					BSP_LCD_FillRect(254, 209, 51, 27); // make origin one more and size both one less
-					HAL_Delay(200);
-					BSP_LCD_SetTextColor(LCD_COLOR_WHITE);
-					BSP_LCD_FillRect(254, 209, 51, 27);
 					BSP_LCD_SetFont(&Font24);
 					BSP_LCD_SetTextColor(LCD_COLOR_BLACK);
 					BSP_LCD_DisplayStringAt(256, 211, (uint8_t*)"M3",LEFT_MODE); 	// M3: (253,208)>(306,237)
 
+					BSP_LCD_SetTextColor(LCD_COLOR_WHITE);
+					BSP_LCD_FillRect(198, 209, 51, 27);
+					BSP_LCD_SetFont(&Font24);
+					BSP_LCD_SetTextColor(LCD_COLOR_BLACK);
+					BSP_LCD_DisplayStringAt(199, 211, (uint8_t*)"M2",LEFT_MODE); 	// M2: (196,208)>(249,237)
+
+					BSP_LCD_SetTextColor(LCD_COLOR_WHITE);
+					BSP_LCD_FillRect(140, 209, 51, 27);
+					BSP_LCD_SetFont(&Font24);
+					BSP_LCD_SetTextColor(LCD_COLOR_BLACK);
+					BSP_LCD_DisplayStringAt(142, 211, (uint8_t*)"M1",LEFT_MODE);
+
 					osMutexRelease(myMutex01Handle);
+
+					M = 3;
 				}
 			}
 		}else{
@@ -204,6 +247,39 @@ void Ass_03_Task_02(void const * argument)
 }
 
 // --------------------- Functions --------------------- 
+//uint8_t test(int M1){
+//	safe_printf("M = %d", M1)
+//}
+
+//uint8_t WriteFile(uint16_t *data, int M1)
+//{
+//#define WRITE_FILE "Hello.txt"
+//	FRESULT res;
+//	UINT byteswritten;
+//
+//	// Open file There.txt
+//	if((res = f_open(&MyFile, WRITE_FILE, FA_CREATE_ALWAYS | FA_WRITE)) != FR_OK)
+//	{
+//		safe_printf("ERROR: Opening '%s'\n", WRITE_FILE);
+//		return 1;
+//	}
+//	safe_printf("Task 1: Opened file '%s'\n", WRITE_FILE);
+//
+//	// Write to file
+//	if ((res = f_write(&MyFile, "Hello", 6, &byteswritten)) != FR_OK)
+//	{
+//		safe_printf("ERROR: Writing '%s'\n", WRITE_FILE);
+//		f_close(&MyFile);
+//		return 1;
+//	}
+//	safe_printf("Task 1: Written: %d bytes\n", byteswritten);
+//
+//	// Close file
+//	f_close(&MyFile);
+//
+//	return 0;
+//}
+
 void draw_buttons(){
 	// Display LED screen layout
 	// ------------------------------------------------------------------------------
