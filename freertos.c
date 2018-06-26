@@ -71,7 +71,12 @@ osMessageQId myQueue03Handle;
 osMessageQId myQueue04Handle;
 osMessageQId myQueue05Handle;
 // -----------------------------------------------
+
+// -----------------------------------------------
 osTimerId myTimer01Handle;
+//osTimerId myTimer02Handle;
+//osTimerId myTimer03Handle;
+// -----------------------------------------------
 
 osMutexId myMutex01Handle;
 osMutexId myMutex02Handle;
@@ -94,7 +99,10 @@ void StartDefaultTask(void const * argument);
 void StartTask02(void const * argument);
 void StartTask03(void const * argument);
 void StartTask04(void const * argument);
+
 void Callback01(void const * argument);
+//void Callback02(void const * argument);
+//void Callback03(void const * argument);
 
 extern void MX_FATFS_Init(void);
 void MX_FREERTOS_Init(void); /* (MISRA C 2004 rule 8.1) */
@@ -170,6 +178,12 @@ void MX_FREERTOS_Init(void) {
   /* definition and creation of myTimer01 */
   osTimerDef(myTimer01, Callback01);
   myTimer01Handle = osTimerCreate(osTimer(myTimer01), osTimerPeriodic, NULL);
+
+//  osTimerDef(myTimer02, Callback02);
+//  myTimer02Handle = osTimerCreate(osTimer(myTimer02), osTimerPeriodic, NULL);
+//
+//  osTimerDef(myTimer03, Callback03);
+//  myTimer03Handle = osTimerCreate(osTimer(myTimer03), osTimerOnce, NULL);
 
   /* USER CODE BEGIN RTOS_TIMERS */
   /* start timers, add new ones, ... */
@@ -262,6 +276,7 @@ void StartTask04(void const * argument)
   /* USER CODE END StartTask04 */
 }
 
+// ----------------------------------------------------------------------------
 /* Callback01 function */
 void Callback01(void const * argument)
 {
@@ -273,6 +288,17 @@ void Callback01(void const * argument)
   /* USER CODE END Callback01 */
 }
 
+//void Callback02(void const * argument)
+//{
+//	//osSignalSet(myTask04Handle, 1);
+//}
+//
+//void Callback03(void const * argument)
+//{
+//	//osTimerStop(myTimer02Handle);
+//}
+
+// ----------------------------------------------------------------------------
 /* USER CODE BEGIN Application */
      
 /* USER CODE END Application */
