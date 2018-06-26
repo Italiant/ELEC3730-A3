@@ -26,7 +26,13 @@ extern osThreadId defaultTaskHandle;
 extern osThreadId myTask02Handle;
 extern osThreadId myTask03Handle;
 extern osThreadId myTask04Handle;
+
+// Timers
+// -----------------------------------------------
 extern osTimerId myTimer01Handle;
+//extern osTimerId myTimer02Handle;
+//extern osTimerId myTimer03Handle;
+// -----------------------------------------------
 
 extern osSemaphoreId myBinarySem01Handle;
 extern osSemaphoreId myBinarySem02Handle;
@@ -66,7 +72,10 @@ extern uint8_t getfp(Coordinate *display);
 	printf(fmt, ##__VA_ARGS__); \
 	osMutexRelease(myMutex02Handle);
 
-extern int analog_global, flag, debug_global;
+//Global Variables
+// -----------------------------------------------
+extern int analog_global, flag, debug_global, M;
+// -----------------------------------------------
 
 //
 // ADD YOUR CODE
