@@ -12,8 +12,8 @@
 #include <stdlib.h>
 
 // --------------------- Function Headers ---------------------
-//uint8_t myReadFile();
-//uint8_t myWriteFile();
+uint8_t myReadFile();
+uint8_t myWriteFile();
 int string_parser(uint8_t *inp, uint8_t **array_of_words_p[]);
 int debug(int *debug);
 int analog_f(int *analog, uint8_t** string, int debug2);
@@ -54,15 +54,14 @@ void Ass_03_Task_01(void const * argument)
 	int words = 0;
 	int debug1 = 0;
 	int analog = 10;
-	uint16_t data[200];
 	safe_printf(">");
 	osEvent event1;
 	// Must stay in while loop forever for synchronous tasks to work together
-	
-	myReadFile();
-	myWriteFile();
-	
-	
+
+	//myReadFile();
+	//myWriteFile();
+
+
 	while (1)
 	{
 		debug1 = debug_global; // Synchronize local debug to global one if changed
@@ -109,16 +108,6 @@ void Ass_03_Task_01(void const * argument)
 			else if((strcmp((const char *)strs[0], "ls") == 0) && words == 1){
 				ls_f();
 			}
-
-			else if((strcmp((const char *)strs[0], "data") == 0) && words == 1){
-				osMessagePut (myQueue05Handle, 1, 0);
-				event1 = osMessageGet(myQueue04Handle, 5);
-						if (event1.status == osEventMessage)
-						{
-							data = event1.value.v;
-						}
-			}
-
 			else{
 				safe_printf("'%s' is an invalid argument, try:\n", strs[0]);
 				safe_printf("\t debug\n \t ls\n \t analog <time>\n \t help <command>\n");
