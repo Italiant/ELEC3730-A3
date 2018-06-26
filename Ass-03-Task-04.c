@@ -11,7 +11,9 @@
 //--------------------- Includes ---------------------
 #include "Ass-03.h"
 
-uint16_t ADC_Value[1000]; // Needs explanation, does not change graph scale
+uint16_t ADC_Value[1000];
+
+//uint8_t myWriteFile(uint16_t *data, int M1);
 
 //--------------------- Task 4: Main ---------------------
 void Ass_03_Task_04(void const * argument)
@@ -32,6 +34,7 @@ void Ass_03_Task_04(void const * argument)
 	uint32_t analog = 10;
 	uint32_t *buff;
 	char *ptr;
+	int memory = 0;
 
 	// Defines coordinates for graph region
 #define XOFF 134
@@ -75,29 +78,21 @@ void Ass_03_Task_04(void const * argument)
 
 			safe_printf("Plotting time changed to (%d)s\n", analog);
 		}
-		buff = analog;
-		double a = atof(buff);
-		//safe_printf("a - %f\n", a);
-		a = 10/a;
-		//safe_printf("a - %f\n", a);
-		sprintf(buff, "%d", a);
-		//safe_printf("buff - %d\n", buff);
 
-		event3 = osMessageGet(myQueue05Handle, 5);
-		if (event1.status == osEventMessage)
+		event3 = osMessageGet(myQueue04Handle, 5);
+		if (event3.status == osEventMessage)
 		{
-			data_s = event1.value.v;
-			if(data_s){
-				osMessagePut (myQueue04Handle, data, 0);
-			}
+			memory = event3.value.v;
+
+			safe_printf("File memory (%d) selected\n", memory);
 		}
 
-
-
 		if(start){ // Used to start and stop plotting the graph
+			//osTimerStart(myTimer02Handle, 1);
 
 			// Wait for first half of buffer
-			osSemaphoreWait(myBinarySem05Handle, osWaitForever);
+			osSemaphoreWait(myBinarySem05Handle, 1000/(18.2/(analog/10)));
+			//osSemaphoreWait(myBinarySem05Handle, osWaitForever);
 			osMutexWait(myMutex01Handle, osWaitForever);
 			for(i=0;i<500;i=i+500)
 			{
@@ -110,7 +105,6 @@ void Ass_03_Task_04(void const * argument)
 				last_xpos=xpos;
 				last_ypos=ypos;
 				data[xpos] = ypos;
-				//osMessagePut (myQueue04Handle, data[xpos], 0);
 				xpos += 1;
 			}
 			osMutexRelease(myMutex01Handle);
@@ -121,7 +115,8 @@ void Ass_03_Task_04(void const * argument)
 			}
 
 			// Wait for second half of buffer
-			osSemaphoreWait(myBinarySem06Handle, osWaitForever);
+			osSemaphoreWait(myBinarySem06Handle, 1000/(18.2/(analog/10)));
+			//osSemaphoreWait(myBinarySem06Handle, osWaitForever);
 			HAL_GPIO_WritePin(GPIOD, LD4_Pin, GPIO_PIN_SET);
 			osMutexWait(myMutex01Handle, osWaitForever);
 			for(i=0;i<500;i=i+500)
@@ -135,7 +130,6 @@ void Ass_03_Task_04(void const * argument)
 				last_xpos=xpos;
 				last_ypos=ypos;
 				data[xpos] = ypos;
-				//osMessagePut (myQueue04Handle, data[xpos], 0);
 				xpos += 1;
 			}
 			osMutexRelease(myMutex01Handle);
@@ -146,24 +140,56 @@ void Ass_03_Task_04(void const * argument)
 			}
 			HAL_GPIO_WritePin(GPIOD, LD4_Pin, GPIO_PIN_RESET);
 
+			//osMessagePut(myQueue04Handle, &data, 0);
 		}
 		else{
+			//osTimerStart(myTimer02Handle, 1);
+			//osTimerStart(myTimer03Handle, analog*1000);
 			// If start is = 0 then do not plot the graph, pause it
 		}
 	}
 }
 
-// Add callback functions to see if this can be used for double buffering equivalent, dont know wtf these do
+// Add callback functions to see if this can be used for double buffering equivalent
 
 void HAL_ADC_ConvHalfCpltCallback(ADC_HandleTypeDef* hadc)
 {
-	osSemaphoreRelease(myBinarySem05Handle);
+	//osSemaphoreRelease(myBinarySem05Handle);
 }
 
 void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
 {
 	HAL_GPIO_WritePin(GPIOD, LD3_Pin, GPIO_PIN_SET);
-	osSemaphoreRelease(myBinarySem06Handle);
+	//osSemaphoreRelease(myBinarySem06Handle);
 	HAL_GPIO_WritePin(GPIOD, LD3_Pin, GPIO_PIN_RESET);
 }
+
+//uint8_t WriteFile(uint16_t *data, int M1)
+//{
+//#define WRITE_FILE "Hello.txt"
+//	FRESULT res;
+//	UINT byteswritten;
+//
+//	// Open file There.txt
+//	if((res = f_open(&MyFile, WRITE_FILE, FA_CREATE_ALWAYS | FA_WRITE)) != FR_OK)
+//	{
+//		safe_printf("ERROR: Opening '%s'\n", WRITE_FILE);
+//		return 1;
+//	}
+//	safe_printf("Task 1: Opened file '%s'\n", WRITE_FILE);
+//
+//	// Write to file
+//	if ((res = f_write(&MyFile, "Hello", 6, &byteswritten)) != FR_OK)
+//	{
+//		safe_printf("ERROR: Writing '%s'\n", WRITE_FILE);
+//		f_close(&MyFile);
+//		return 1;
+//	}
+//	safe_printf("Task 1: Written: %d bytes\n", byteswritten);
+//
+//	// Close file
+//	f_close(&MyFile);
+//
+//	return 0;
+//}
 
