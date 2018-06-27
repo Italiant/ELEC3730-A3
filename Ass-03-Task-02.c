@@ -11,7 +11,8 @@
 #include "Ass-03.h"
 
 //--------------------- Function Headers ---------------------
-void draw_buttons();
+void draw_button(uint8_t colour, uint8_t xpos, uint8_t ypos, uint8_t text_ypos, uint8_t text);
+void draw_screen();
 
 //--------------------- Defines ---------------------
 #define XOFF 134
@@ -30,18 +31,15 @@ void Ass_03_Task_02(void const * argument)
 {
 	// Declaring variables
 	int loop=0;
-	uint32_t start = 1;
 	Coordinate display;
 
 	osEvent event;
-	uint16_t *data_task2;
-
 
 	// Wait for signal from task 1 to start
 	osSignalWait(1,osWaitForever);
 	safe_printf("Hello from Task 2 - Pulse Rate Application (touch screen input)\n");
 
-	draw_buttons(); // Draw the display interface
+	draw_screen(); // Draw the display interface
 
 	// Must stay in this while loop to work
 	while (1)
@@ -64,20 +62,26 @@ void Ass_03_Task_02(void const * argument)
 				// --------------------- Start --------------------- 
 				if((display.y > 3) && (display.y < 47))
 				{
-					osMutexWait(myMutex01Handle, osWaitForever);
+					draw_button("green", 4, 124, 13, "Start");
+					
+//					osMutexWait(myMutex01Handle, osWaitForever);
+//
+//					BSP_LCD_SetTextColor(LCD_COLOR_GREEN);
+//					BSP_LCD_FillRect(4, 4, 124, 43); // make origin one more and size both one less
+//					HAL_Delay(200);
+//					BSP_LCD_SetTextColor(LCD_COLOR_WHITE);
+//					BSP_LCD_FillRect(4, 4, 124, 43);
+//					BSP_LCD_SetFont(&Font24);
+//					BSP_LCD_SetTextColor(LCD_COLOR_BLACK);
+//					BSP_LCD_DisplayStringAt(6, 13, (uint8_t*)"Start",LEFT_MODE); 	// Start: (3,3)>(128,47)
+//					
+//					osMutexRelease(myMutex01Handle);
 
-					BSP_LCD_SetTextColor(LCD_COLOR_GREEN);
-					BSP_LCD_FillRect(4, 4, 124, 43); // make origin one more and size both one less
-					HAL_Delay(200);
-					BSP_LCD_SetTextColor(LCD_COLOR_WHITE);
-					BSP_LCD_FillRect(4, 4, 124, 43);
-					BSP_LCD_SetFont(&Font24);
-					BSP_LCD_SetTextColor(LCD_COLOR_BLACK);
-					BSP_LCD_DisplayStringAt(6, 13, (uint8_t*)"Start",LEFT_MODE); 	// Start: (3,3)>(128,47)
+					osMessagePut (myQueue02Handle, 1, 0); // Sends message to task 4 start the plotting the graph			
 
-					osMessagePut (myQueue02Handle, 1, 0); // Sends message to task 4 start the plotting the graph
-
-					osMutexRelease(myMutex01Handle);
+					if(debug_global){
+						safe_printf("Start button pressed\n");
+					}
 				}
 				// --------------------- Stop --------------------- 
 				else if((display.y > 51) && (display.y < 95))						
@@ -96,6 +100,10 @@ void Ass_03_Task_02(void const * argument)
 					osMessagePut (myQueue02Handle, 0, 0); // Sends message to task 4 stop the plotting the graph
 
 					osMutexRelease(myMutex01Handle);
+
+					if(debug_global){
+						safe_printf("Stop button pressed\n");
+					}
 				}
 				// --------------------- Load --------------------- 
 				else if((display.y > 99) && (display.y < 143))
@@ -112,6 +120,10 @@ void Ass_03_Task_02(void const * argument)
 					BSP_LCD_DisplayStringAt(6, 109, (uint8_t*)"Load",LEFT_MODE); 	// Load: (3,99)>(128,143)
 
 					osMutexRelease(myMutex01Handle);
+
+					if(debug_global){
+						safe_printf("Load button pressed\n");
+					}
 				}
 				// --------------------- Store --------------------- 
 				else if((display.y > 147) && (display.y < 191))
@@ -129,8 +141,11 @@ void Ass_03_Task_02(void const * argument)
 
 					osMutexRelease(myMutex01Handle);
 
-					osMessagePut(myQueue04Handle, M, 0);
+					osMessagePut(myQueue04Handle, M, 0); // Sends memory position to task 4 and triggers function to store data
 
+					if(debug_global){
+						safe_printf("Store button pressed\n");
+					}
 				}
 				// --------------------- Debug --------------------- 
 				else if((display.y > 195) && (display.y < 237))
@@ -146,14 +161,14 @@ void Ass_03_Task_02(void const * argument)
 					BSP_LCD_SetTextColor(LCD_COLOR_BLACK);
 					BSP_LCD_DisplayStringAt(6, 205, (uint8_t*)"Debug",LEFT_MODE); // Debug: (3,195)>(128,237)
 
+					osMutexRelease(myMutex01Handle);
+
 					debug_global = !debug_global;
 					if(debug_global){
 						safe_printf("Debug messages will be displayed\n");
 					}else{
 						safe_printf("Debug messages will not be displayed\n");
 					}
-
-					osMutexRelease(myMutex01Handle);
 				}
 			}else if((display.y >= 208) && (display.y <= 238)){
 				// --------------------- M1 ---------------------
@@ -182,6 +197,11 @@ void Ass_03_Task_02(void const * argument)
 					osMutexRelease(myMutex01Handle);
 
 					M = 1;
+
+					if(debug_global){
+						safe_printf("M1 button pressed\n");
+						safe_printf("Memory = (%d)\n", M);
+					}
 				}
 				// --------------------- M2 ---------------------
 				else if((display.x > 197) && (display.x < 248))
@@ -209,6 +229,11 @@ void Ass_03_Task_02(void const * argument)
 					osMutexRelease(myMutex01Handle);
 
 					M = 2;
+
+					if(debug_global){
+						safe_printf("M1 button pressed\n");
+						safe_printf("Memory = (%d)\n", M);
+					}
 				}
 				// --------------------- M3 ---------------------
 				else if((display.x > 254) && (display.x < 305))
@@ -236,6 +261,11 @@ void Ass_03_Task_02(void const * argument)
 					osMutexRelease(myMutex01Handle);
 
 					M = 3;
+
+					if(debug_global){
+						safe_printf("M1 button pressed\n");
+						safe_printf("Memory = (%d)\n", M);
+					}
 				}
 			}
 		}else{
@@ -246,7 +276,36 @@ void Ass_03_Task_02(void const * argument)
 
 // --------------------- Functions --------------------- 
 
-void draw_buttons(){
+void draw_button(uint8_t colour, uint8_t xpos, uint8_t ypos, uint8_t text_ypos, uint8_t text){
+	osMutexWait(myMutex01Handle, osWaitForever);
+	if((strcmp((const char *)colour, "green") == 0)){
+		BSP_LCD_SetTextColor(LCD_COLOR_GREEN);
+	}
+	if((strcmp((const char *)colour, "red") == 0)){
+		BSP_LCD_SetTextColor(LCD_COLOR_RED);
+	}
+	if((strcmp((const char *)colour, "blue") == 0)){
+		BSP_LCD_SetTextColor(LCD_COLOR_BLUE);
+	}
+	if((strcmp((const char *)colour, "magenta") == 0)){
+		BSP_LCD_SetTextColor(LCD_COLOR_MAGENTA);
+	}
+	if((strcmp((const char *)colour, "brown") == 0)){
+		BSP_LCD_SetTextColor(LCD_COLOR_BROWN);
+	}
+
+	BSP_LCD_FillRect(4, xpos, 124, ypos);
+	HAL_Delay(200);
+	BSP_LCD_SetTextColor(LCD_COLOR_WHITE);
+	BSP_LCD_FillRect(4, xpos, 124, ypos);
+	BSP_LCD_SetFont(&Font24);
+	BSP_LCD_SetTextColor(LCD_COLOR_BLACK);
+	BSP_LCD_DisplayStringAt(6, text_ypos, text,LEFT_MODE);
+
+	osMutexRelease(myMutex01Handle);
+}
+
+void draw_screen(){
 	// Display LED screen layout
 	// ------------------------------------------------------------------------------
 	osMutexWait(myMutex01Handle, osWaitForever);
