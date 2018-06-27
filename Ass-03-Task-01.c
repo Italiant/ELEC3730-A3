@@ -59,7 +59,7 @@ void Ass_03_Task_01(void const * argument)
 	int debug1 = 0;
 	int analog = 10;
 	osEvent event1;
-
+	safe_printf(">");
 
 	//myReadFile();
 	//myWriteFile();
@@ -132,9 +132,9 @@ void Ass_03_Task_01(void const * argument)
 				safe_printf("'%s' is an invalid argument, try:\n", strs[0]);
 				safe_printf("\t debug\n \t ls\n \t analog <time>\n \t cd <dir>\n \t mkdir <dir>\n \t rm <file>\n \t cp <src> <dst>\n \t help <command>\n");
 			}
-
+			safe_printf(">");
 		}else{// Else if enter key is not pressed
-			safe_printf("(%c)", c);
+			safe_printf("%c", c);
 			pos++; // Increase position
 		}
 	}
@@ -305,10 +305,9 @@ int ls_f(){
 				errors(res);
 				break;
 			}
-//			if(inf.fname[0] == 0){
-//
-//				break;  /* Break on error or end of dir */
-//			}
+			if(inf.fname[0] == 0){
+				break;  /* Break on error or end of dir */
+			}
 			if (inf.fattrib & AM_DIR) {                    /* It is a directory */
 															/* Enter the directory */
 				if (res != FR_OK){
@@ -323,7 +322,6 @@ int ls_f(){
 				//safe_printf("Date: %d\n", inf.fdate);
 				//safe_printf("Time: %d\n", inf.ftime);
 				files += 1;
-				break;
 			}
 		}
 		safe_printf("Folders: %d\n", folders);
