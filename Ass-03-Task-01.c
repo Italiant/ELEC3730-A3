@@ -36,6 +36,8 @@ int debug_global;
 // --------------------- Task 1: Main ---------------------
 void Ass_03_Task_01(void const * argument)
 {
+	safe_printf("\014");
+
 	safe_printf("Hello from Task 1 - Console (serial input)\n");
 	safe_printf("INFO: Initialise LCD and TP first...\n");
 
@@ -128,9 +130,14 @@ void Ass_03_Task_01(void const * argument)
 			else if((strcmp((const char *)strs[0], "cp") == 0) && words > 1){
 				cp_f(strs);
 			}
+			// clear -> clear's and resets terminal window
+			else if((strcmp((const char *)strs[0], "clear") == 0) && words == 1){
+				safe_printf("\014"); // Clear
+				safe_printf("\033[3J"); // Reset
+			}
 			else{
 				safe_printf("'%s' is an invalid argument, try:\n", strs[0]);
-				safe_printf("\t debug\n \t ls\n \t analog <time>\n \t cd <dir>\n \t mkdir <dir>\n \t rm <file>\n \t cp <src> <dst>\n \t help <command>\n");
+				safe_printf("\t debug\n \t ls\n \t analog <time>\n \t cd <dir>\n \t mkdir <dir>\n \t rm <file>\n \t cp <src> <dst>\n \t clear\n \t help <command>\n");
 			}
 			safe_printf(">");
 		}else{// Else if enter key is not pressed
@@ -185,9 +192,14 @@ void helpfn(uint8_t** string){
 		safe_printf("cp <src> <dst> : copies the file <src> to the destination <dst>\n");
 	}
 
+	else if((strcmp((const char *)string[1], "clear") == 0)){
+
+		safe_printf("clear : clears and resets terminal screen\n");
+	}
+
 	else{
 		safe_printf("ERROR: Unknown help command '%s', try help <command>:\n", string[1]);
-		safe_printf("\t debug\n \t ls\n \t analog\n \t cd\n \t mkdir\n \t rm\n \t cp\n");
+		safe_printf("\t debug\n \t ls\n \t analog\n \t cd\n \t mkdir\n \t rm\n \t cp\n \t clear\n");
 	}
 }
 
