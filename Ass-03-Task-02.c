@@ -12,8 +12,6 @@
 
 //--------------------- Function Headers ---------------------
 void draw_buttons();
-//uint8_t myWriteFile(uint16_t *data, int M1);
-//uint8_t test(int M1);
 
 //--------------------- Defines ---------------------
 #define XOFF 134
@@ -247,38 +245,6 @@ void Ass_03_Task_02(void const * argument)
 }
 
 // --------------------- Functions --------------------- 
-//uint8_t test(int M1){
-//	safe_printf("M = %d", M1)
-//}
-
-//uint8_t WriteFile(uint16_t *data, int M1)
-//{
-//#define WRITE_FILE "Hello.txt"
-//	FRESULT res;
-//	UINT byteswritten;
-//
-//	// Open file There.txt
-//	if((res = f_open(&MyFile, WRITE_FILE, FA_CREATE_ALWAYS | FA_WRITE)) != FR_OK)
-//	{
-//		safe_printf("ERROR: Opening '%s'\n", WRITE_FILE);
-//		return 1;
-//	}
-//	safe_printf("Task 1: Opened file '%s'\n", WRITE_FILE);
-//
-//	// Write to file
-//	if ((res = f_write(&MyFile, "Hello", 6, &byteswritten)) != FR_OK)
-//	{
-//		safe_printf("ERROR: Writing '%s'\n", WRITE_FILE);
-//		f_close(&MyFile);
-//		return 1;
-//	}
-//	safe_printf("Task 1: Written: %d bytes\n", byteswritten);
-//
-//	// Close file
-//	f_close(&MyFile);
-//
-//	return 0;
-//}
 
 void draw_buttons(){
 	// Display LED screen layout
