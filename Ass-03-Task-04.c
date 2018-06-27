@@ -13,8 +13,8 @@
 uint16_t ADC_Value[1000];
 
 //--------------------- Function Headers ---------------------
-uint8_t WriteFile(uint32_t *data, uint32_t M1);
-uint8_t read_file(uint32_t M2);
+uint8_t WriteFile(uint16_t *data, uint32_t M1);
+uint8_t read_file(uint32_t memory);
 
 //--------------------- Defines ---------------------
 // Defines coordinates for graph region
@@ -31,7 +31,7 @@ void Ass_03_Task_04(void const * argument)
 {
 	// Declare variables
 	uint16_t i;
-	uint32_t data[182];
+	//uint32_t data[182];
 	HAL_StatusTypeDef status;
 	uint16_t xpos=0;
 	uint16_t ypos=0;
@@ -42,7 +42,14 @@ void Ass_03_Task_04(void const * argument)
 	uint8_t memory = 0;
 
 	osEvent event1, event2, event3, event4;
-
+	//used to mesh data together
+	int j = 0;
+	int k = 0;
+	//used to hold meshed data
+	uint16_t data_train[182];
+	for(k = 0; k < XSIZE; k++){
+		data_train[k] = 98;
+	}
 	// Waits for signal from task 1 to start
 	osSignalWait(1,osWaitForever);
 	safe_printf("Hello from Task 4 - Analog Input (turn ADC knob or use pulse sensor)\n");
@@ -87,7 +94,7 @@ void Ass_03_Task_04(void const * argument)
 			if(debug_global){
 				safe_printf("File memory (%d) selected\n", memory);
 			}
-			WriteFile(data, memory);
+			WriteFile(data_train, memory);
 		}
 
 		// Wait for message from task 2 to receive memory position - LOAD
@@ -99,11 +106,10 @@ void Ass_03_Task_04(void const * argument)
 			if(debug_global){
 				safe_printf("File memory (%d) selected\n", memory);
 			}
-			// read_file(data, memory);
+			read_file(memory);
 		}
 
 		if(start){ // Used to start and stop plotting the graph
-			//osTimerStart(myTimer02Handle, 1);
 
 			// Wait for first half of buffer
 			osSemaphoreWait(myBinarySem05Handle, 1000/(18.2/(analog/10)));
@@ -119,10 +125,14 @@ void Ass_03_Task_04(void const * argument)
 				// BSP_LCD_FillRect(xpos,ypos,1,1);
 				last_xpos=xpos;
 				last_ypos=ypos;
-				data[xpos] = ypos;
+				//data[xpos] = ypos;
 				xpos += 1;
 			}
 			osMutexRelease(myMutex01Handle);
+
+			data_train[j] = ypos;
+			j++;
+
 			if (last_xpos>=XSIZE-1)
 			{
 				xpos=0;
@@ -144,22 +154,31 @@ void Ass_03_Task_04(void const * argument)
 				// BSP_LCD_FillCircle(xpos,ypos,2);
 				last_xpos=xpos;
 				last_ypos=ypos;
-				data[xpos] = ypos;
+				//data[xpos] = ypos;
 				xpos += 1;
 			}
 			osMutexRelease(myMutex01Handle);
+
+			data_train[j] = ypos;
+			j++;
+
 			if (last_xpos>=XSIZE-1)
 			{
 				xpos=0;
 				last_xpos=0;
 			}
-			HAL_GPIO_WritePin(GPIOD, LD4_Pin, GPIO_PIN_RESET);
 
+
+			HAL_GPIO_WritePin(GPIOD, LD4_Pin, GPIO_PIN_RESET);
 		}
 		else{
-			//osTimerStart(myTimer02Handle, 1);
-			//osTimerStart(myTimer03Handle, analog*1000);
 			// If start is = 0 then do not plot the graph, pause it
+		}
+		if(j >= 182){
+			j = 0;
+			for(k = 0; k < XSIZE; k++){
+				data_train[k] = 98;
+			}
 		}
 	}
 }
@@ -178,10 +197,12 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
 	HAL_GPIO_WritePin(GPIOD, LD3_Pin, GPIO_PIN_RESET);
 }
 
-uint8_t WriteFile(uint32_t *data, uint32_t M1)
+uint8_t WriteFile(uint16_t *data, uint32_t M1)
 {
-	safe_printf("data 1 = %d\n", data[1]);
-	safe_printf("mem = %d\n", M1);
+	for(int k = 0; k <XSIZE; k++){
+		safe_printf("data %d = %d\n", k, data[k]);
+	}
+
 	FRESULT res;
 	UINT byteswritten;
 	FIL file;
@@ -201,7 +222,7 @@ uint8_t WriteFile(uint32_t *data, uint32_t M1)
 	safe_printf("Task 4: Opened file '%s'\n", buffer);
 
 	// Write to file
-	if ((res = f_write(&file, data, 182, &byteswritten)) != FR_OK)
+	if ((res = f_write(&file, data, XSIZE*sizeof(uint16_t), &byteswritten)) != FR_OK)
 	{
 		safe_printf("ERROR: Writing '%s'\n", buffer);
 		f_close(&file);
@@ -216,28 +237,44 @@ uint8_t WriteFile(uint32_t *data, uint32_t M1)
 	return 0;
 }
 
-uint8_t read_file(uint32_t M2){
-	FILE* file;
+uint8_t read_file(uint32_t memory){
+	FIL file;
 	FRESULT res;
 	char buffer[100];
 	UINT bytesread;
-	uint16_t data[200];
-
-	sprintf(buffer, "Memory_%d.txt", M2);
+	uint16_t data[XSIZE];
 
 	osMutexWait(myMutex01Handle, osWaitForever);
-	if((res = f_open(&file, data, FA_READ)) != FR_OK){
-		safe_printf("ERROR: Cannot open the file\n");
+	sprintf(buffer,"Memory_%d.txt",memory);
+	if((res = f_open(&file, buffer, FA_READ)) != FR_OK){
+		safe_printf("Error: opening the file\n");
 		return 1;
 	}
-	if((res = f_read(&file, data, 182, &bytesread)) != FR_OK){
-		safe_printf("ERROR: Could not read the file\n");
+	if((res = f_read(&file, data, XSIZE*sizeof(uint16_t), &bytesread)) != FR_OK){
+		safe_printf("Error: data did not read file\n");
 		f_close(&file);
 		return 1;
 	}
+
+	for(int k = 0; k < XSIZE; k++){
+		safe_printf("data %d = %d\n", k, data[k]);
+	}
+
+	safe_printf("Data was read from Memory_%d\n", memory);
 	f_close(&file);
 
-	osMutexRelease(myMutex01Handle);
+	uint8_t last_xpos = 0;
+	uint8_t last_ypos = 0;
+	uint8_t ypos = 0;
+	for(uint8_t xpos = 0; xpos < XSIZE; xpos++){
+		ypos = data[xpos];
+		BSP_LCD_SetTextColor(LCD_COLOR_WHITE);
+		BSP_LCD_DrawVLine(XOFF+xpos, YOFF, YSIZE);
+		BSP_LCD_SetTextColor(LCD_COLOR_BLACK);
+		BSP_LCD_DrawLine(XOFF + last_xpos, YOFF + last_ypos, XOFF+xpos, YOFF+ypos);
+		last_xpos = xpos;
+		last_ypos = ypos;
+		osMutexRelease(myMutex01Handle);
+	}
 	return 0;
 }
-
