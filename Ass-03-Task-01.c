@@ -9,7 +9,6 @@
 //
 //--------------------- Includes ---------------------
 #include "Ass-03.h"
-#include <stdlib.h>
 
 // --------------------- Function Headers ---------------------
 uint8_t myReadFile();
