@@ -14,12 +14,16 @@
 // --------------------- Function Headers ---------------------
 uint8_t myReadFile();
 uint8_t myWriteFile();
-int string_parser(uint8_t *inp, uint8_t **array_of_words_p[]);
+int string_parser(uint8_t *input_p, uint8_t **array_of_words_p[]);
 int debug(int *debug);
 int analog_f(int *analog, uint8_t** string, int debug2);
 int ls_f();
 FRESULT scan_files(char* path);
 void helpfn(uint8_t** string);
+int8_t cd_f(uint8_t** string, uint8_t word_count);
+int8_t mkdir_f(uint8_t** string);
+int8_t rm_f(uint8_t** string);
+int8_t cp_f(uint8_t** string);
 
 // --------------------- File & Global Variables ---------------------
 FIL MyFile;
@@ -108,16 +112,32 @@ void Ass_03_Task_01(void const * argument)
 			else if((strcmp((const char *)strs[0], "ls") == 0) && words == 1){
 				ls_f();
 			}
+
+			else if((strcmp((const char *)strs[0], "cd") == 0) && words > 1){
+				cd_f(strs, words);
+			}
+
+			else if((strcmp((const char *)strs[0], "mkdir") == 0) && words > 1){
+				mkdir_f(strs);
+			}
+
+			else if((strcmp((const char *)strs[0], "rm") == 0) && words > 1){
+				rm_f(strs);
+			}
+
+			else if((strcmp((const char *)strs[0], "cp") == 0) && words > 1){
+				cp_f(strs);
+			}
 			else{
 				safe_printf("'%s' is an invalid argument, try:\n", strs[0]);
-				safe_printf("\t debug\n \t ls\n \t analog <time>\n \t help <command>\n");
+				safe_printf("\t debug\n \t ls\n \t analog <time>\n \t cd <dir>\n \t mkdir <dir>\n \t rm <file>\n \t cp <src> <dst>\n \t help <command>\n");
 			}
 
 			safe_printf(">");
 			// Else if enter key is not pressed
 		}else{
 			safe_printf("Got(%c)\n", c);
-			pos++; // Increace position
+			pos++; // Increase position
 		}
 	}
 
@@ -134,13 +154,120 @@ void helpfn(uint8_t** string){
 
 	else if((strcmp((const char *)string[1], "analog") == 0)){
 
-		safe_printf("analog <time> : changes the plot of the analog input for the given time period\n");
+		safe_printf("analog <time> : changes the plot of the analog input for the given time period <time>\n");
 	}
 
 	else if((strcmp((const char *)string[1], "ls") == 0)){
 
 		safe_printf("ls : lists the contents of the current folder\n");
 	}
+
+	else if((strcmp((const char *)string[1], "cd") == 0)){
+
+		safe_printf("cd <dir> : changes the current working folder to <dir>\n");
+	}
+
+	else if((strcmp((const char *)string[1], "mkdir") == 0)){
+
+		safe_printf("mkdir <dir> : creates a new folder <dir>\n");
+	}
+
+	else if((strcmp((const char *)string[1], "rm") == 0)){
+
+		safe_printf("rm <file> : deletes the file <file>\n");
+	}
+
+	else if((strcmp((const char *)string[1], "cp") == 0)){
+
+		safe_printf("cp <src> <dst> : copies the file <src> to the destination <dst>\n");
+	}
+
+	else{
+		safe_printf("ERROR: Unknown help command '%s', try help <command>:\n", (*string)[1]);
+		safe_printf("\t debug\n \t ls\n \t analog\n \t cd\n \t mkdir\n \t rm\n \t cp\n");
+	}
+}
+
+// Function: Copy File
+//
+//
+int8_t cp_f(uint8_t** string){
+	FRESULT res;
+	res = f_rename((*string)[1], (*string)[2]);
+	if (res != FR_OK){
+		safe_printf("ERROR: Could not copy file '%s' to '%s'", (*string)[1], (*string)[2]);
+		return 1;
+	}else{
+		safe_printf("The file '%s' was copied to '%s'", (*string)[1], (*string)[2]);
+		return 0;
+	}
+	return 0;
+}
+
+
+// Function: Delete File
+//
+//
+int8_t rm_f(uint8_t** string){
+	FILINFO * info;
+	FRESULT res;
+	res = f_stat((*string)[1], info);
+	if (res == FR_INVALID_NAME){
+		safe_printf("ERROR: The file '%s' does not exist\n", (*string)[1]);
+		return 1;
+
+	}else{
+		res = f_unlink((*string)[1]);
+		if (res==FR_OK){
+			safe_printf("File '%s' removed\n", (*string)[1]);
+		}else if(res == FR_DENIED){
+			printf("ERROR: Could not remove file '%s', directory must be empty\n", (*string)[1]);
+		}else{
+			safe_printf("ERROR: Unknown file command '%d'\n", res);
+		}
+	}
+	return 0;
+}
+
+//Function: Change Current Directory
+//
+//
+int8_t cd_f(uint8_t** string, uint8_t word_count){
+	FRESULT res;
+	if (word_count < 3) {
+		if (word_count < 2) {
+			(*string)[1] = "/";
+		}
+		// change directory to the path
+		res = f_chdir((*string)[1]);
+		if (res != FR_OK) {
+			safe_printf("ERROR: Unknown directory command '%d'\n", res);
+			return 1;
+		}else{
+			safe_printf("Directory changed to '%s'\n", (*string)[1]);
+		}
+	}
+	else {
+		safe_printf("ERROR: Incorrect argument\n");
+	}
+
+	return 0;
+}
+
+// Function: Make a New Directory
+//
+//
+int8_t mkdir_f(uint8_t** string){
+	FRESULT res;
+	res = f_mkdir((*string)[1]);
+	if (res != FR_OK) {
+		safe_printf("ERROR: Unknown directory command '%d'\n", res);
+		return 1;
+	}else{
+		safe_printf("Folder '%s' created\n", (*string)[1]);
+	}
+
+	return 0;
 }
 
 
@@ -198,7 +325,7 @@ FRESULT scan_files(char* path){
 }
 
 // Function: Plot Analog Input
-// Input: 
+// Input: A valid pointer to the analog variable, the input string and the debug option
 // Result: 
 int analog_f(int *analog, uint8_t** string, int debug2){
 	int number;
@@ -254,33 +381,33 @@ int debug(int *debug){
 }
 
 // Function: String Parser
-// Input: 
-// Result: 
-int string_parser(uint8_t *inp, uint8_t **array_of_words_p[]){
+// Input: A valid input string and a pointer to a double array which will be the new array of words
+// Result: Updates array of words by seperating the input string into words
+int string_parser(uint8_t *input_p, uint8_t **array_of_words_p[]){
 
 	int string_length = 0;
-	for (int i = 0; inp[i] != '\0'; i++){		// reading though getting the length of the input string
+	for (int i = 0; input_p[i] != '\0'; i++){		// reading though getting the length of the input string
 		string_length++;
 	}
 
-	uint8_t *pinp = (uint8_t*)malloc(sizeof(uint8_t) * string_length);
-	int pinp_it = 0;
-	for (int i = 0; inp[i] != '\0'; i++){
-		if (inp[i] != 8){
-			pinp[pinp_it] = inp[i];
-			pinp_it++;
+	uint8_t *temp = (uint8_t*)malloc(sizeof(uint8_t) * string_length);
+	int temp_pos = 0;
+	for (int i = 0; input_p[i] != '\0'; i++){
+		if (input_p[i] != 8){
+			temp[temp_pos] = temp[i];
+			temp_pos++;
 		}
-		else if (pinp_it > 0){
-			pinp_it--;
+		else if (temp_pos > 0){
+			temp_pos--;
 		}
 	}
-	pinp[pinp_it] = '\0';
+	temp[temp_pos] = '\0';
 
 	int letter_count = 0;
 	int word_count = 0;
-	for (int i = 0; inp[i] != '\0'; i++){
-		if ((i > 0 && inp[i] == ' ' && inp[i-1] != ' ') 	// if the character is a space and the previous (reason for i > 0) character wasnt a space
-				|| (inp[i+1] == '\0' && inp[i] != ' ')){		// OR this is the last word and the character isnt a space i.e. it is a word
+	for (int i = 0; input_p[i] != '\0'; i++){
+		if ((i > 0 && input_p[i] == ' ' && input_p[i-1] != ' ') 	// if the character is a space and the previous (reason for i > 0) character wasnt a space
+				|| (input_p[i+1] == '\0' && input_p[i] != ' ')){		// OR this is the last word and the character isnt a space i.e. it is a word
 			word_count++;
 		}
 	}
@@ -288,9 +415,9 @@ int string_parser(uint8_t *inp, uint8_t **array_of_words_p[]){
 	*array_of_words_p = (uint8_t**)malloc(sizeof(uint8_t*) * (word_count));
 	word_count = 0;
 
-	for (int i = 0; pinp[i] != '\0'; i++){
-		if ((i > 0 && pinp[i] == ' ' && pinp[i-1] != ' ') || (pinp[i+1] == '\0' && pinp[i] != ' ')){	// same word check as before
-			if (pinp[i+1] == '\0'){	//if this is a word and it is the last word
+	for (int i = 0; temp[i] != '\0'; i++){
+		if ((i > 0 && temp[i] == ' ' && temp[i-1] != ' ') || (temp[i+1] == '\0' && temp[i] != ' ')){	// same word check as before
+			if (temp[i+1] == '\0'){	//if this is a word and it is the last word
 				letter_count++;		// off by one error says i need to increment the letter count...
 			}
 			(*array_of_words_p)[word_count] = (uint8_t*)malloc(sizeof(uint8_t)*(letter_count+1));		//allocate memory of lettercount size at this words point in the array
@@ -298,7 +425,7 @@ int string_parser(uint8_t *inp, uint8_t **array_of_words_p[]){
 			letter_count = 0;		//reset lettercount for the next word
 			word_count++;
 		}
-		if (i > 0 && pinp[i] == ' ' && pinp[i-1] == ' '){		// if this is a space and the previous character was a space
+		if (i > 0 && temp[i] == ' ' && temp[i-1] == ' '){		// if this is a space and the previous character was a space
 			continue;										// dont increment the letter count just continue reading
 		}
 		else {
@@ -309,25 +436,25 @@ int string_parser(uint8_t *inp, uint8_t **array_of_words_p[]){
 	word_count = 0;
 	letter_count = 0;
 
-	for (int i = 0; pinp[i] != '\0'; i++){
-		if ((i > 0 && pinp[i] == ' ' && pinp[i-1] != ' ') || (pinp[i+1] == '\0' && pinp[i] != ' ')){	// same word check again
-			if (pinp[i+1] == '\0'){	//if this is a word and it is the last word
-				(*array_of_words_p)[word_count][letter_count] = pinp[i];
+	for (int i = 0; temp[i] != '\0'; i++){
+		if ((i > 0 && temp[i] == ' ' && temp[i-1] != ' ') || (temp[i+1] == '\0' && temp[i] != ' ')){	// same word check again
+			if (temp[i+1] == '\0'){	//if this is a word and it is the last word
+				(*array_of_words_p)[word_count][letter_count] = temp[i];
 				letter_count++;
 			}
 			(*array_of_words_p)[word_count][letter_count] = '\0';
 			word_count++;
 			letter_count = 0;
 		}
-		else if (pinp[i] == ' '){		// if this is a space and the previous character was a space
+		else if (temp[i] == ' '){		// if this is a space and the previous character was a space
 			continue;										// dont increment the letter count just continue reading
 		}
 		else{
-			(*array_of_words_p)[word_count][letter_count] = pinp[i];
+			(*array_of_words_p)[word_count][letter_count] = temp[i];
 			letter_count++;
 		}
 	}
-	free(pinp);
+	free(temp);
 
 	return word_count;
 
