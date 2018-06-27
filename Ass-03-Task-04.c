@@ -13,7 +13,7 @@
 uint16_t ADC_Value[1000];
 
 //--------------------- Function Headers ---------------------
-uint8_t myWriteFile(uint32_t *data, int M1);
+uint8_t WriteFile(uint32_t *data, int M1);
 uint8_t read_file(int M2);
 
 //--------------------- Defines ---------------------
@@ -87,7 +87,7 @@ void Ass_03_Task_04(void const * argument)
 			if(debug_global){
 				safe_printf("File memory (%d) selected\n", memory);
 			}
-			// myWriteFile(data, memory);
+		 WriteFile(data, memory);
 		}
 
 		if(start){ // Used to start and stop plotting the graph
