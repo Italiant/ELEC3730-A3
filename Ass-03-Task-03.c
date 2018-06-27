@@ -15,6 +15,7 @@
 //--------------------- Includes ---------------------
 #include "Ass-03.h"
 
+//--------------------- Defines ---------------------
 // The number of times to register the front panel as being pressed
 #define ON_COUNT   1
 #define OFF_COUNT 20
