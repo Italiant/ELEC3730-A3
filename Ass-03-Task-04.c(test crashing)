@@ -13,7 +13,7 @@
 uint16_t ADC_Value[1000];
 
 //--------------------- Function Headers ---------------------
-uint8_t WriteFile(uint32_t *data, uint32_t M1);
+uint8_t WriteFile(uint16_t *data, uint32_t M1);
 uint8_t read_file(uint32_t memory);
 
 //--------------------- Defines ---------------------
@@ -31,7 +31,7 @@ void Ass_03_Task_04(void const * argument)
 {
 	// Declare variables
 	uint16_t i;
-	uint32_t data[182];
+	//uint32_t data[182];
 	HAL_StatusTypeDef status;
 	uint16_t xpos=0;
 	uint16_t ypos=0;
@@ -46,7 +46,7 @@ void Ass_03_Task_04(void const * argument)
 	int j = 0;
 	int k = 0;
 	//used to hold meshed data
-	uint32_t data_train[182];
+	uint16_t data_train[182];
 	for(k = 0; k < XSIZE; k++){
 		data_train[k] = 98;
 	}
@@ -125,7 +125,7 @@ void Ass_03_Task_04(void const * argument)
 				// BSP_LCD_FillRect(xpos,ypos,1,1);
 				last_xpos=xpos;
 				last_ypos=ypos;
-				data[xpos] = ypos;
+				//data[xpos] = ypos;
 				xpos += 1;
 			}
 			osMutexRelease(myMutex01Handle);
@@ -154,7 +154,7 @@ void Ass_03_Task_04(void const * argument)
 				// BSP_LCD_FillCircle(xpos,ypos,2);
 				last_xpos=xpos;
 				last_ypos=ypos;
-				data[xpos] = ypos;
+				//data[xpos] = ypos;
 				xpos += 1;
 			}
 			osMutexRelease(myMutex01Handle);
@@ -196,7 +196,7 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
 	HAL_GPIO_WritePin(GPIOD, LD3_Pin, GPIO_PIN_RESET);
 }
 
-uint8_t WriteFile(uint32_t *data, uint32_t M1)
+uint8_t WriteFile(uint16_t *data, uint32_t M1)
 {
 	for(int k = 0; k <XSIZE; k++){
 		safe_printf("data %d = %d\n", k, data[k]);
@@ -221,7 +221,7 @@ uint8_t WriteFile(uint32_t *data, uint32_t M1)
 	safe_printf("Task 4: Opened file '%s'\n", buffer);
 
 	// Write to file
-	if ((res = f_write(&file, data, XSIZE*sizeof(uint32_t), &byteswritten)) != FR_OK)
+	if ((res = f_write(&file, data, XSIZE*sizeof(uint16_t), &byteswritten)) != FR_OK)
 	{
 		safe_printf("ERROR: Writing '%s'\n", buffer);
 		f_close(&file);
@@ -241,15 +241,15 @@ uint8_t read_file(uint32_t memory){
 	FRESULT res;
 	char buffer[100];
 	UINT bytesread;
-	uint32_t data[XSIZE];
+	uint16_t data[XSIZE];
 
-    osMutexWait(myMutex01Handle, osWaitForever);
+	osMutexWait(myMutex01Handle, osWaitForever);
 	sprintf(buffer,"Memory_%d.txt",memory);
 	if((res = f_open(&file, buffer, FA_READ)) != FR_OK){
 		safe_printf("Error: opening the file\n");
 		return 1;
 	}
-	if((res = f_read(&file, data, XSIZE*sizeof(uint32_t), &bytesread)) != FR_OK){
+	if((res = f_read(&file, data, XSIZE*sizeof(uint16_t), &bytesread)) != FR_OK){
 		safe_printf("Error: data did not read file\n");
 		f_close(&file);
 		return 1;
@@ -273,7 +273,7 @@ uint8_t read_file(uint32_t memory){
 		BSP_LCD_DrawLine(XOFF + last_xpos, YOFF + last_ypos, XOFF+xpos, YOFF+ypos);
 		last_xpos = xpos;
 		last_ypos = ypos;
-   osMutexRelease(myMutex01Handle);
+		osMutexRelease(myMutex01Handle);
 	}
-    return 0;
+	return 0;
 }
