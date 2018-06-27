@@ -58,17 +58,14 @@ void Ass_03_Task_01(void const * argument)
 	int words = 0;
 	int debug1 = 0;
 	int analog = 10;
-	safe_printf(">");
 	osEvent event1;
-	// Must stay in while loop forever for synchronous tasks to work together
-
+	
 	//myReadFile();
 	//myWriteFile();
 
-
-	while (1)
+	while (1)// Must stay in while loop forever for synchronous tasks to work together
 	{
-		debug1 = debug_global; // Synchronize local debug to global one if changed
+		debug1 = debug_global; // Synchronize local debug to global debug
 
 		// Get input from console via getchar();
 		c = getchar();
@@ -104,7 +101,7 @@ void Ass_03_Task_01(void const * argument)
 				analog_f(&analog, strs, debug1);
 				osMessagePut (myQueue03Handle, analog, 0);
 			}
-			// Calling the help function helpfn
+			// Help <command> -> Prints useful help messages
 			else if((strcmp((const char *)strs[0], "help") == 0) && words > 1){
 				helpfn(strs);
 			}
@@ -112,19 +109,19 @@ void Ass_03_Task_01(void const * argument)
 			else if((strcmp((const char *)strs[0], "ls") == 0) && words == 1){
 				ls_f();
 			}
-
+			// cd <dir> -> Changes current working directory
 			else if((strcmp((const char *)strs[0], "cd") == 0) && words > 1){
 				cd_f(strs, words);
 			}
-
+			// mkdir <dir> -> Creates a new folder
 			else if((strcmp((const char *)strs[0], "mkdir") == 0) && words > 1){
 				mkdir_f(strs);
 			}
-
+			// rm <file> -> deletes the file
 			else if((strcmp((const char *)strs[0], "rm") == 0) && words > 1){
 				rm_f(strs);
 			}
-
+			// cp <src> <dst> -> copies the file to the destination
 			else if((strcmp((const char *)strs[0], "cp") == 0) && words > 1){
 				cp_f(strs);
 			}
@@ -132,10 +129,8 @@ void Ass_03_Task_01(void const * argument)
 				safe_printf("'%s' is an invalid argument, try:\n", strs[0]);
 				safe_printf("\t debug\n \t ls\n \t analog <time>\n \t cd <dir>\n \t mkdir <dir>\n \t rm <file>\n \t cp <src> <dst>\n \t help <command>\n");
 			}
-
-			safe_printf(">");
-			// Else if enter key is not pressed
-		}else{
+			
+		}else{// Else if enter key is not pressed
 			safe_printf("Got(%c)\n", c);
 			pos++; // Increase position
 		}
@@ -145,10 +140,13 @@ void Ass_03_Task_01(void const * argument)
 
 // --------------------- Functions ---------------------
 
+// Function: Help
+// Input: A valid array of words
+// Output: Prints useful help messages for the input command
 void helpfn(uint8_t** string){
 
 	if((strcmp((const char *)string[1], "debug") == 0)){
-
+		
 		safe_printf("debug : toggles between debug on or off\n");
 	}
 
@@ -189,8 +187,8 @@ void helpfn(uint8_t** string){
 }
 
 // Function: Copy File
-//
-//
+// Input: A valid array of words
+// Output: Copies the specified file to the destination location
 int8_t cp_f(uint8_t** string){
 	FRESULT res;
 	res = f_rename((*string)[1], (*string)[2]);
@@ -204,10 +202,9 @@ int8_t cp_f(uint8_t** string){
 	return 0;
 }
 
-
 // Function: Delete File
-//
-//
+// Input: A valid array of words
+// Output: Deletes the specified file
 int8_t rm_f(uint8_t** string){
 	FILINFO * info;
 	FRESULT res;
@@ -230,8 +227,8 @@ int8_t rm_f(uint8_t** string){
 }
 
 //Function: Change Current Directory
-//
-//
+// Input: A valid array of words and the number of words
+// Output: Changes the current working folder
 int8_t cd_f(uint8_t** string, uint8_t word_count){
 	FRESULT res;
 	if (word_count < 3) {
@@ -255,8 +252,8 @@ int8_t cd_f(uint8_t** string, uint8_t word_count){
 }
 
 // Function: Make a New Directory
-//
-//
+// Input: A valid array of words
+// Output: Creates a new folder
 int8_t mkdir_f(uint8_t** string){
 	FRESULT res;
 	res = f_mkdir((*string)[1]);
@@ -270,10 +267,9 @@ int8_t mkdir_f(uint8_t** string){
 	return 0;
 }
 
-
 // Function: List Directory Contents
-// Input: 
-// Result: 
+// Input: n/a
+// Result: Prints the contents of the current folder
 int ls_f(){
 	FATFS fs;
 	FRESULT res;
@@ -326,7 +322,7 @@ FRESULT scan_files(char* path){
 
 // Function: Plot Analog Input
 // Input: A valid pointer to the analog variable, the input string and the debug option
-// Result: 
+// Result: Updates and converts analog value to an integer and updates scale on LCD screen
 int analog_f(int *analog, uint8_t** string, int debug2){
 	int number;
 	char *pnt;
@@ -365,8 +361,8 @@ int analog_f(int *analog, uint8_t** string, int debug2){
 }
 
 // Function: Debug
-// Input: 
-// Result: 
+// Input: A valid pointer to an integer
+// Result: Toggles debug on or off
 int debug(int *debug){
 	int ret;
 	*debug = !*debug;
