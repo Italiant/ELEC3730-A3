@@ -13,7 +13,8 @@
 uint16_t ADC_Value[1000];
 
 //--------------------- Function Headers ---------------------
-//uint8_t myWriteFile(uint16_t *data, int M1);
+uint8_t myWriteFile(uint32_t *data, int M1);
+uint8_t read_file(int M2);
 
 //--------------------- Defines ---------------------
 // Defines coordinates for graph region
@@ -30,7 +31,7 @@ void Ass_03_Task_04(void const * argument)
 {
 	// Declare variables
 	uint16_t i;
-	uint16_t data[200];
+	uint32_t data[200];
 	HAL_StatusTypeDef status;
 	uint16_t xpos=0;
 	uint16_t ypos=0;
@@ -165,32 +166,63 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
 	HAL_GPIO_WritePin(GPIOD, LD3_Pin, GPIO_PIN_RESET);
 }
 
-//uint8_t WriteFile(uint16_t *data, int M1)
-//{
-//#define WRITE_FILE "Hello.txt"
-//	FRESULT res;
-//	UINT byteswritten;
-//
-//	// Open file There.txt
-//	if((res = f_open(&MyFile, WRITE_FILE, FA_CREATE_ALWAYS | FA_WRITE)) != FR_OK)
-//	{
-//		safe_printf("ERROR: Opening '%s'\n", WRITE_FILE);
-//		return 1;
-//	}
-//	safe_printf("Task 1: Opened file '%s'\n", WRITE_FILE);
-//
-//	// Write to file
-//	if ((res = f_write(&MyFile, "Hello", 6, &byteswritten)) != FR_OK)
-//	{
-//		safe_printf("ERROR: Writing '%s'\n", WRITE_FILE);
-//		f_close(&MyFile);
-//		return 1;
-//	}
-//	safe_printf("Task 1: Written: %d bytes\n", byteswritten);
-//
-//	// Close file
-//	f_close(&MyFile);
-//
-//	return 0;
-//}
+uint8_t WriteFile(uint32_t *data, int M1)
+{
+	FRESULT res;
+	UINT byteswritten;
+	FILE* file;
+	char buffer[100];
+	
+	sprintf(buffer, "Memory_%d.txt", M1);
+	
+	osMutexWait(myMutex01Handle, osWaitForever);
+
+	// Open file mem.txt
+	
+	if((res = f_open(&file, buffer, FA_CREATE_ALWAYS | FA_WRITE)) != FR_OK)
+	{
+		safe_printf("ERROR: Opening '%s'\n", buffer);
+		return 1;
+	}
+	safe_printf("Task 4: Opened file '%s'\n", buffer);
+
+	// Write to file
+	if ((res = f_write(&file, data, 182, &byteswritten)) != FR_OK)
+	{
+		safe_printf("ERROR: Writing '%s'\n", buffer);
+		f_close(&file);
+		return 1;
+	}
+	safe_printf("Task 4: Written: %d bytes\n", byteswritten);
+
+	// Close file
+	f_close(&file);
+
+	osMutexRelease(myMutex01Handle);
+	return 0;
+}
+
+uint8_t read_file(int M2){
+	FILE* file;
+	FRESULT res;
+	char buffer[100];
+	UNIT bytesread;
+	uint16_t data[200];
+	
+	sprintf(buffer, "Memory_%d.txt", M2);
+	
+	osMutexWait(myMutex01Handle, osWaitForever);
+	if((res = f_open(&file, data, FA_READ)) != FR_OK){
+		safe_printf("ERROR: Cannot open the file\n");
+		return 1;
+	}
+	if((res = f_read(&file, data, 182, &bytesread)) != FR_OK){
+		safe_printf("ERROR: Could not read the file\n");
+		f_close(&file);
+		return 1;
+	}
+	f_close(&file);
+	
+	osMutexRelease(myMutex01Handle);
+}
 
