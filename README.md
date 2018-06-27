@@ -6,4 +6,3 @@
 ## Task 3 - Front Pannel
 
 ## Task 4 - Graph
--> Graph
