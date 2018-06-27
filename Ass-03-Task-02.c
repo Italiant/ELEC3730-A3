@@ -11,7 +11,7 @@
 #include "Ass-03.h"
 
 //--------------------- Function Headers ---------------------
-void draw_button(uint8_t colour, uint8_t xpos, uint8_t ypos, uint8_t text_ypos, uint8_t text);
+//void draw_button(uint8_t* colour, uint8_t xpos, uint8_t ypos, uint8_t text_ypos, uint8_t* text);
 void draw_screen();
 
 //--------------------- Defines ---------------------
@@ -62,20 +62,20 @@ void Ass_03_Task_02(void const * argument)
 				// --------------------- Start --------------------- 
 				if((display.y > 3) && (display.y < 47))
 				{
-					draw_button("green", 4, 124, 13, "Start");
+					//draw_button("green", 4, 124, 13, "Start");
+
+					osMutexWait(myMutex01Handle, osWaitForever);
+
+					BSP_LCD_SetTextColor(LCD_COLOR_GREEN);
+					BSP_LCD_FillRect(4, 4, 124, 43); // make origin one more and size both one less
+					HAL_Delay(200);
+					BSP_LCD_SetTextColor(LCD_COLOR_WHITE);
+					BSP_LCD_FillRect(4, 4, 124, 43);
+					BSP_LCD_SetFont(&Font24);
+					BSP_LCD_SetTextColor(LCD_COLOR_BLACK);
+					BSP_LCD_DisplayStringAt(6, 13, (uint8_t*)"Start",LEFT_MODE); 	// Start: (3,3)>(128,47)
 					
-//					osMutexWait(myMutex01Handle, osWaitForever);
-//
-//					BSP_LCD_SetTextColor(LCD_COLOR_GREEN);
-//					BSP_LCD_FillRect(4, 4, 124, 43); // make origin one more and size both one less
-//					HAL_Delay(200);
-//					BSP_LCD_SetTextColor(LCD_COLOR_WHITE);
-//					BSP_LCD_FillRect(4, 4, 124, 43);
-//					BSP_LCD_SetFont(&Font24);
-//					BSP_LCD_SetTextColor(LCD_COLOR_BLACK);
-//					BSP_LCD_DisplayStringAt(6, 13, (uint8_t*)"Start",LEFT_MODE); 	// Start: (3,3)>(128,47)
-//					
-//					osMutexRelease(myMutex01Handle);
+					osMutexRelease(myMutex01Handle);
 
 					osMessagePut (myQueue02Handle, 1, 0); // Sends message to task 4 start the plotting the graph			
 
@@ -120,6 +120,8 @@ void Ass_03_Task_02(void const * argument)
 					BSP_LCD_DisplayStringAt(6, 109, (uint8_t*)"Load",LEFT_MODE); 	// Load: (3,99)>(128,143)
 
 					osMutexRelease(myMutex01Handle);
+
+					osMessagePut(myQueue05Handle, M, 0);
 
 					if(debug_global){
 						safe_printf("Load button pressed\n");
@@ -276,34 +278,34 @@ void Ass_03_Task_02(void const * argument)
 
 // --------------------- Functions --------------------- 
 
-void draw_button(uint8_t colour, uint8_t xpos, uint8_t ypos, uint8_t text_ypos, uint8_t text){
-	osMutexWait(myMutex01Handle, osWaitForever);
-	if((strcmp((const char *)colour, "green") == 0)){
-		BSP_LCD_SetTextColor(LCD_COLOR_GREEN);
-	}
-	if((strcmp((const char *)colour, "red") == 0)){
-		BSP_LCD_SetTextColor(LCD_COLOR_RED);
-	}
-	if((strcmp((const char *)colour, "blue") == 0)){
-		BSP_LCD_SetTextColor(LCD_COLOR_BLUE);
-	}
-	if((strcmp((const char *)colour, "magenta") == 0)){
-		BSP_LCD_SetTextColor(LCD_COLOR_MAGENTA);
-	}
-	if((strcmp((const char *)colour, "brown") == 0)){
-		BSP_LCD_SetTextColor(LCD_COLOR_BROWN);
-	}
-
-	BSP_LCD_FillRect(4, xpos, 124, ypos);
-	HAL_Delay(200);
-	BSP_LCD_SetTextColor(LCD_COLOR_WHITE);
-	BSP_LCD_FillRect(4, xpos, 124, ypos);
-	BSP_LCD_SetFont(&Font24);
-	BSP_LCD_SetTextColor(LCD_COLOR_BLACK);
-	BSP_LCD_DisplayStringAt(6, text_ypos, text,LEFT_MODE);
-
-	osMutexRelease(myMutex01Handle);
-}
+//void draw_button(uint8_t* colour, uint8_t xpos, uint8_t ypos, uint8_t text_ypos, uint8_t* text){
+//	osMutexWait(myMutex01Handle, osWaitForever);
+//	if((strcmp((const char *)colour, "green") == 0)){
+//		BSP_LCD_SetTextColor(LCD_COLOR_GREEN);
+//	}
+//	if((strcmp((const char *)colour, "red") == 0)){
+//		BSP_LCD_SetTextColor(LCD_COLOR_RED);
+//	}
+//	if((strcmp((const char *)colour, "blue") == 0)){
+//		BSP_LCD_SetTextColor(LCD_COLOR_BLUE);
+//	}
+//	if((strcmp((const char *)colour, "magenta") == 0)){
+//		BSP_LCD_SetTextColor(LCD_COLOR_MAGENTA);
+//	}
+//	if((strcmp((const char *)colour, "brown") == 0)){
+//		BSP_LCD_SetTextColor(LCD_COLOR_BROWN);
+//	}
+//
+//	BSP_LCD_FillRect(4, xpos, 124, ypos);
+//	HAL_Delay(200);
+//	BSP_LCD_SetTextColor(LCD_COLOR_WHITE);
+//	BSP_LCD_FillRect(4, xpos, 124, ypos);
+//	BSP_LCD_SetFont(&Font24);
+//	BSP_LCD_SetTextColor(LCD_COLOR_BLACK);
+//	BSP_LCD_DisplayStringAt(6, text_ypos, text,LEFT_MODE);
+//
+//	osMutexRelease(myMutex01Handle);
+//}
 
 void draw_screen(){
 	// Display LED screen layout
