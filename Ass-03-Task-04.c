@@ -10,7 +10,6 @@
 
 //--------------------- Includes ---------------------
 #include "Ass-03.h"
-
 uint16_t ADC_Value[1000];
 
 //--------------------- Function Headers ---------------------
@@ -24,6 +23,7 @@ uint16_t ADC_Value[1000];
 #define YSIZE 187
 
 //--------------------- Global Variables ---------------------
+int debug_global;
 
 //--------------------- Task 4: Main ---------------------
 void Ass_03_Task_04(void const * argument)
@@ -82,8 +82,10 @@ void Ass_03_Task_04(void const * argument)
 		if (event3.status == osEventMessage)
 		{
 			memory = event3.value.v;
-
-			safe_printf("File memory (%d) selected\n", memory);
+			
+			if(debug_global){
+				safe_printf("File memory (%d) selected\n", memory);
+			}
 			// myWriteFile(data, memory);
 		}
 
