@@ -13,7 +13,17 @@
 
 uint16_t ADC_Value[1000];
 
+//--------------------- Function Headers ---------------------
 //uint8_t myWriteFile(uint16_t *data, int M1);
+
+//--------------------- Defines ---------------------
+// Defines coordinates for graph region
+#define XOFF 134
+#define YOFF 5
+#define XSIZE 182
+#define YSIZE 187
+
+//--------------------- Global Variables ---------------------
 
 //--------------------- Task 4: Main ---------------------
 void Ass_03_Task_04(void const * argument)
@@ -21,26 +31,16 @@ void Ass_03_Task_04(void const * argument)
 	// Declare variables
 	uint16_t i;
 	uint16_t data[200];
-	uint16_t data_s = 0;
 	HAL_StatusTypeDef status;
 	uint16_t xpos=0;
 	uint16_t ypos=0;
 	uint16_t last_xpos=0;
 	uint16_t last_ypos=0;
-	int analog_pre = 10;
-
-	// osEvent event;
 	uint32_t start = 1;
 	uint32_t analog = 10;
-	uint32_t *buff;
-	char *ptr;
-	int memory = 0;
+	uint8_t memory = 0;
 
-	// Defines coordinates for graph region
-#define XOFF 134
-#define YOFF 5
-#define XSIZE 182
-#define YSIZE 187
+	osEvent event1, event2, event3;
 
 	// Waits for signal from task 1 to start
 	osSignalWait(1,osWaitForever);
@@ -52,8 +52,6 @@ void Ass_03_Task_04(void const * argument)
 	{
 		safe_printf("ERROR: Task 4 HAL_ADC_Start_DMA() %d\n", status);
 	}
-
-	osEvent event1, event2, event3;
 
 	// Start main loop
 	while (1)
@@ -70,7 +68,7 @@ void Ass_03_Task_04(void const * argument)
 			}
 		}
 
-		// Wait for message from task 2 to recieve analog input... TODO: use this updated value to change graph scale
+		// Wait for message from task 2 to receive analog input
 		event2 = osMessageGet(myQueue03Handle, 5);
 		if (event2.status == osEventMessage)
 		{
@@ -79,12 +77,14 @@ void Ass_03_Task_04(void const * argument)
 			safe_printf("Plotting time changed to (%d)s\n", analog);
 		}
 
+		// Wait for message from task 2 to receive memory position
 		event3 = osMessageGet(myQueue04Handle, 5);
 		if (event3.status == osEventMessage)
 		{
 			memory = event3.value.v;
 
 			safe_printf("File memory (%d) selected\n", memory);
+			// myWriteFile(data, memory);
 		}
 
 		if(start){ // Used to start and stop plotting the graph
@@ -140,7 +140,6 @@ void Ass_03_Task_04(void const * argument)
 			}
 			HAL_GPIO_WritePin(GPIOD, LD4_Pin, GPIO_PIN_RESET);
 
-			//osMessagePut(myQueue04Handle, &data, 0);
 		}
 		else{
 			//osTimerStart(myTimer02Handle, 1);
