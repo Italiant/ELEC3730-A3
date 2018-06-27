@@ -13,8 +13,8 @@
 uint16_t ADC_Value[1000];
 
 //--------------------- Function Headers ---------------------
-uint8_t WriteFile(uint32_t *data, int M1);
-uint8_t read_file(int M2);
+uint8_t WriteFile(uint32_t *data, uint32_t M1);
+uint8_t read_file(uint32_t M2);
 
 //--------------------- Defines ---------------------
 // Defines coordinates for graph region
@@ -31,7 +31,7 @@ void Ass_03_Task_04(void const * argument)
 {
 	// Declare variables
 	uint16_t i;
-	uint32_t data[200];
+	uint32_t data[182];
 	HAL_StatusTypeDef status;
 	uint16_t xpos=0;
 	uint16_t ypos=0;
@@ -41,7 +41,7 @@ void Ass_03_Task_04(void const * argument)
 	uint32_t analog = 10;
 	uint8_t memory = 0;
 
-	osEvent event1, event2, event3;
+	osEvent event1, event2, event3, event4;
 
 	// Waits for signal from task 1 to start
 	osSignalWait(1,osWaitForever);
@@ -78,16 +78,28 @@ void Ass_03_Task_04(void const * argument)
 			safe_printf("Plotting time changed to (%d)s\n", analog);
 		}
 
-		// Wait for message from task 2 to receive memory position
+		// Wait for message from task 2 to receive memory position - STORE
 		event3 = osMessageGet(myQueue04Handle, 5);
 		if (event3.status == osEventMessage)
 		{
 			memory = event3.value.v;
-			
+
 			if(debug_global){
 				safe_printf("File memory (%d) selected\n", memory);
 			}
-		 WriteFile(data, memory);
+			WriteFile(data, memory);
+		}
+
+		// Wait for message from task 2 to receive memory position - LOAD
+		event4 = osMessageGet(myQueue05Handle, 5);
+		if (event4.status == osEventMessage)
+		{
+			memory = event4.value.v;
+
+			if(debug_global){
+				safe_printf("File memory (%d) selected\n", memory);
+			}
+			// read_file(data, memory);
 		}
 
 		if(start){ // Used to start and stop plotting the graph
@@ -166,19 +178,21 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
 	HAL_GPIO_WritePin(GPIOD, LD3_Pin, GPIO_PIN_RESET);
 }
 
-uint8_t WriteFile(uint32_t *data, int M1)
+uint8_t WriteFile(uint32_t *data, uint32_t M1)
 {
+	safe_printf("data 1 = %d\n", data[1]);
+	safe_printf("mem = %d\n", M1);
 	FRESULT res;
 	UINT byteswritten;
-	FILE* file;
-	char buffer[100];
-	
+	FIL file;
+	char buffer[20];
+
 	sprintf(buffer, "Memory_%d.txt", M1);
-	
+
 	osMutexWait(myMutex01Handle, osWaitForever);
 
 	// Open file mem.txt
-	
+
 	if((res = f_open(&file, buffer, FA_CREATE_ALWAYS | FA_WRITE)) != FR_OK)
 	{
 		safe_printf("ERROR: Opening '%s'\n", buffer);
@@ -202,15 +216,15 @@ uint8_t WriteFile(uint32_t *data, int M1)
 	return 0;
 }
 
-uint8_t read_file(int M2){
+uint8_t read_file(uint32_t M2){
 	FILE* file;
 	FRESULT res;
 	char buffer[100];
-	UNIT bytesread;
+	UINT bytesread;
 	uint16_t data[200];
-	
+
 	sprintf(buffer, "Memory_%d.txt", M2);
-	
+
 	osMutexWait(myMutex01Handle, osWaitForever);
 	if((res = f_open(&file, data, FA_READ)) != FR_OK){
 		safe_printf("ERROR: Cannot open the file\n");
@@ -222,7 +236,8 @@ uint8_t read_file(int M2){
 		return 1;
 	}
 	f_close(&file);
-	
+
 	osMutexRelease(myMutex01Handle);
+	return 0;
 }
 
