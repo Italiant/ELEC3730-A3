@@ -20,6 +20,7 @@
 #include <malloc.h>
 #include <string.h>
 #include <math.h>
+#include <stdlib.h>
 
 // OS handles
 extern osThreadId defaultTaskHandle;
@@ -70,6 +71,7 @@ extern uint8_t getfp(Coordinate *display);
 #define safe_printf(fmt, ...) \
 	osMutexWait(myMutex02Handle, osWaitForever); \
 	printf(fmt, ##__VA_ARGS__); \
+	fflush(stdout); \
 	osMutexRelease(myMutex02Handle);
 
 //Global Variables
