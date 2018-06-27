@@ -58,7 +58,7 @@ void Ass_03_Task_01(void const * argument)
 	int debug1 = 0;
 	int analog = 10;
 	osEvent event1;
-	
+
 	//myReadFile();
 	//myWriteFile();
 
@@ -128,7 +128,7 @@ void Ass_03_Task_01(void const * argument)
 				safe_printf("'%s' is an invalid argument, try:\n", strs[0]);
 				safe_printf("\t debug\n \t ls\n \t analog <time>\n \t cd <dir>\n \t mkdir <dir>\n \t rm <file>\n \t cp <src> <dst>\n \t help <command>\n");
 			}
-			
+
 		}else{// Else if enter key is not pressed
 			safe_printf("Got(%c)\n", c);
 			pos++; // Increase position
@@ -145,7 +145,7 @@ void Ass_03_Task_01(void const * argument)
 void helpfn(uint8_t** string){
 
 	if((strcmp((const char *)string[1], "debug") == 0)){
-		
+
 		safe_printf("debug : toggles between debug on or off\n");
 	}
 
@@ -272,25 +272,14 @@ int8_t mkdir_f(uint8_t** string){
 int ls_f(){
 	FATFS fs;
 	FRESULT res;
-	char buff[256];
-	res = f_mount(&fs, "", 1);
-	if (res == FR_OK) {
-		strcpy(buff, "/");
-		res = scan_files(buff);
-	}
-	return 0;
-}
-
-// Function: Scan Files
-// Input: A valid char pointer to the directory path
-// Result: Lists the contents of the specified path
-FRESULT scan_files(char* path){
-	FRESULT res;
 	DIR dir;
+	char* path;
 	int i;
 	static FILINFO inf;
 	int folders = 0, files = 0;
+	UINT pathlength = 20;
 
+	res = f_getcwd(path, pathlength);
 	res = f_opendir(&dir, path);                       /* Open the directory */
 	if (res == FR_OK) {
 		for (;;) {
@@ -303,21 +292,83 @@ FRESULT scan_files(char* path){
 				if (res != FR_OK) break;
 				path[i] = 0;
 				safe_printf("%s (folder)\n", inf.fname);
-				folders++;
+				folders += 1;
 			} else {                                       /* It is a file. */
 				safe_printf("%s (%d bytes)\n", inf.fname, inf.fsize);
 				//printf("%s\n",inf.fattrib);
 				//safe_printf("Date: %d\n", inf.fdate);
 				//safe_printf("Time: %d\n", inf.ftime);
-				files++;
+				files += 1;
+				break;
 			}
 		}
+		safe_printf("Folders: %d\n", folders);
+		safe_printf("Files: %d\n", files);
 		f_closedir(&dir);
+	}else{
+		safe_printf("ERROR: SD card could not be read properly\n");
+		return 0;
 	}
-	safe_printf("Folders: %d\n", folders);
-	safe_printf("Files: %d\n", files);
 	return res;
 }
+
+
+
+
+
+
+
+
+
+
+
+
+//	char buff[256];
+//	res = f_mount(&fs, "", 1);
+//	if (res == FR_OK) {
+//		strcpy(buff, "/");
+//		res = scan_files(buff);
+//	}
+//	return 0;
+//}
+
+// Function: Scan Files
+// Input: A valid char pointer to the directory path
+// Result: Lists the contents of the specified path
+//FRESULT scan_files(char* path){
+//	FRESULT res;
+//	DIR dir;
+//	int i;
+//	static FILINFO inf;
+//	int folders = 0, files = 0;
+//
+//	res = f_opendir(&dir, path);                       /* Open the directory */
+//	if (res == FR_OK) {
+//		for (;;) {
+//			res = f_readdir(&dir, &inf);                   /* Read a directory item */
+//			if (res != FR_OK || inf.fname[0] == 0) break;  /* Break on error or end of dir */
+//			if (inf.fattrib & AM_DIR) {                    /* It is a directory */
+//				i = strlen(path);
+//				sprintf(&path[i], "/%s", inf.fname);
+//				res = scan_files(path);                    /* Enter the directory */
+//				if (res != FR_OK) break;
+//				path[i] = 0;
+//				safe_printf("%s (folder)\n", inf.fname);
+//				folders++;
+//			} else {                                       /* It is a file. */
+//				safe_printf("%s (%d bytes)\n", inf.fname, inf.fsize);
+//				//printf("%s\n",inf.fattrib);
+//				//safe_printf("Date: %d\n", inf.fdate);
+//				//safe_printf("Time: %d\n", inf.ftime);
+//				files++;
+//			}
+//		}
+//		f_closedir(&dir);
+//	}
+//	safe_printf("Folders: %d\n", folders);
+//	safe_printf("Files: %d\n", files);
+//	return res;
+//}
 
 // Function: Plot Analog Input
 // Input: A valid pointer to the analog variable, the input string and the debug option
