@@ -31,7 +31,6 @@ void Ass_03_Task_04(void const * argument)
 {
 	// Declare variables
 	uint16_t i;
-	//uint32_t data[182];
 	HAL_StatusTypeDef status;
 	uint16_t xpos=0;
 	uint16_t ypos=0;
@@ -41,13 +40,16 @@ void Ass_03_Task_04(void const * argument)
 	uint32_t analog = 10;
 	uint8_t memory = 0;
 
+	// Event variables
 	osEvent event1, event2, event3, event4;
-	//used to mesh data together
+	
+	// Used to mesh data together
 	int j = 0;
 	int k = 0;
-	//used to hold meshed data
+	
+	// Used to hold meshed data
 	uint16_t data_train[182];
-	for(k = 0; k < XSIZE; k++){
+	for(k = 0; k < XSIZE; k++){											// Initializes data array with 98 which in y position terms is a straight line
 		data_train[k] = 98;
 	}
 	// Waits for signal from task 1 to start
@@ -65,10 +67,10 @@ void Ass_03_Task_04(void const * argument)
 	while (1)
 	{
 		// Wait for message from task 2 to start and stop plotting the graph
-		event1 = osMessageGet(myQueue02Handle, 5); 	// Waits 5ms each loop to receive the message and trigger the small interrupt 
-		if (event1.status == osEventMessage) 		// Checks if the received message has any information in it
+		event1 = osMessageGet(myQueue02Handle, 5); 						// Waits 5ms each loop to receive the message and trigger the small interrupt 
+		if (event1.status == osEventMessage) 							// Checks if the received message has any information in it
 		{
-			start = event1.value.v;					// Saves the event value from the message to the local variable
+			start = event1.value.v;										// Saves the event value from the message to the local variable
 			if(start){
 				safe_printf("Plotting graph\n");
 			}else{
@@ -94,7 +96,7 @@ void Ass_03_Task_04(void const * argument)
 			if(debug_global){
 				safe_printf("File memory (%d) selected\n", memory);
 			}
-			write_file(data_train, memory);
+			write_file(data_train, memory);								// Calls write function and sends the data array with x and y positions and the memory position
 		}
 
 		// Wait for message from task 2 to receive memory position - LOAD
@@ -105,14 +107,14 @@ void Ass_03_Task_04(void const * argument)
 
 			if(debug_global){
 				safe_printf("File memory (%d) selected\n", memory);
-			}
-			read_file(memory);
+			}					
+			read_file(memory);											// Calls the read function and sends the memory position
 		}
 
 		if(start){ // Used to start and stop plotting the graph
 
 			// Wait for first half of buffer
-			osSemaphoreWait(myBinarySem05Handle, 1000/(18.2/(analog/10))); 	// Changed semaphore so it acts as an analog timer which adjusts the time scale of the plotting graph
+			osSemaphoreWait(myBinarySem05Handle, 1000/(18.2/(analog/10)));	// Changed semaphore so it acts as an analog timer which adjusts the time scale of the plotting graph
 			//osSemaphoreWait(myBinarySem05Handle, osWaitForever);			// Changed from this line
 			osMutexWait(myMutex01Handle, osWaitForever);
 			for(i=0;i<500;i=i+500)
@@ -128,8 +130,8 @@ void Ass_03_Task_04(void const * argument)
 			}
 			osMutexRelease(myMutex01Handle);
 
-			data_train[j] = ypos; 	// Stores the y position in the data train array for each corresponding x position for the first half of the buffer
-			j++;					// Increments j which is the x position
+			data_train[j] = ypos; 										// Stores the y position in the data train array for each corresponding x position for the first half of the buffer
+			j++;														// Increments j which is the x position
 
 			if (last_xpos>=XSIZE-1)
 			{
@@ -138,7 +140,7 @@ void Ass_03_Task_04(void const * argument)
 			}
 
 			// Wait for second half of buffer
-			osSemaphoreWait(myBinarySem06Handle, 1000/(18.2/(analog/10)));
+			osSemaphoreWait(myBinarySem06Handle, 1000/(18.2/(analog/10)));	// Also changed this semaphore as well to make it into an analog timer
 			//osSemaphoreWait(myBinarySem06Handle, osWaitForever);
 			HAL_GPIO_WritePin(GPIOD, LD4_Pin, GPIO_PIN_SET);
 			osMutexWait(myMutex01Handle, osWaitForever);
@@ -157,8 +159,8 @@ void Ass_03_Task_04(void const * argument)
 			}
 			osMutexRelease(myMutex01Handle);
 
-			data_train[j] = ypos;	// Stores the y position in the data train array for each corresponding x position for the second half of the buffer
-			j++;					// Increments j which is the x position
+			data_train[j] = ypos;										// Stores the y position in the data train array for each corresponding x position for the second half of the buffer
+			j++;														// Increments j which is the x position
 
 			if (last_xpos>=XSIZE-1)
 			{
@@ -172,9 +174,9 @@ void Ass_03_Task_04(void const * argument)
 		else{
 			// If start is == 0 then do not plot the graph, pause it
 		}
-		if(j >= 182){						// When the x position has reached the end of the plotting screen (or greater because semaphores miss the check if it is only one point)
-			j = 0;							// Reset the x position to 0
-			for(k = 0; k < XSIZE; k++){		// Resets the data array to all be 98 which is exactly half of YSIZE which becomes a straight line
+		if(j >= 182){													// When the x position has reached the end of the plotting screen (or greater because semaphores miss the check if it is only one point)
+			j = 0;														// Reset the x position to 0
+			for(k = 0; k < XSIZE; k++){									// Resets the data array to all be 98 which is exactly half of YSIZE which becomes a straight line
 				data_train[k] = 98;
 			}
 		}
