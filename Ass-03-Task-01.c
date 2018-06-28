@@ -29,14 +29,12 @@ void errors(FRESULT code);
 FIL MyFile;
 FIL MyFile2, MyFile3;
 FRESULT Status;
-int analog_global = 10;
-int flag = 0;
 int debug_global;
 
 // --------------------- Task 1: Main ---------------------
 void Ass_03_Task_01(void const * argument)
 {
-	safe_printf("\014");
+	safe_printf("\014"); // Command to clear terminal window
 
 	safe_printf("Hello from Task 1 - Console (serial input)\n");
 	safe_printf("INFO: Initialise LCD and TP first...\n");
@@ -132,16 +130,16 @@ void Ass_03_Task_01(void const * argument)
 			}
 			// clear -> clear's and resets terminal window
 			else if((strcmp((const char *)strs[0], "clear") == 0) && words == 1){
-				safe_printf("\014"); // Clear
-				safe_printf("\033[3J"); // Reset
+				safe_printf("\014"); // Clears terminal window
+				safe_printf("\033[3J"); // Resets terminal window
 			}
 			else{
 				safe_printf("'%s' is an invalid argument, try:\n", strs[0]);
-				safe_printf("\t debug\n \t ls\n \t analog <time>\n \t cd <dir>\n \t mkdir <dir>\n \t rm <file>\n \t cp <src> <dst>\n \t clear\n \t help <command>\n");
+				safe_printf("\t debug\n \t ls\n \t analog <time>\n \t cd <dir>\n \t mkdir <dir>\n \t rm <file>\n \t cp <src> <dst>\n \t clear\n \t help <command>\n"); // Prints list of all possible commands
 			}
 			safe_printf(">");
 		}else{// Else if enter key is not pressed
-			safe_printf("%c", c);
+			safe_printf("%c", c); // Print character to screen because putty does not do that automatically
 			pos++; // Increase position
 		}
 	}
@@ -157,42 +155,42 @@ void Ass_03_Task_01(void const * argument)
 // Output: Prints useful help messages for the input command
 void helpfn(uint8_t** string){
 
-	if((strcmp((const char *)string[1], "debug") == 0)){
+	if((strcmp((const char *)string[1], "debug") == 0)){														// Debug
 
 		safe_printf("debug : toggles between debug on or off\n");
 	}
 
-	else if((strcmp((const char *)string[1], "analog") == 0)){
+	else if((strcmp((const char *)string[1], "analog") == 0)){													// Analog
 
 		safe_printf("analog <time> : changes the plot of the analog input for the given time period <time>\n");
 	}
 
-	else if((strcmp((const char *)string[1], "ls") == 0)){
+	else if((strcmp((const char *)string[1], "ls") == 0)){														// LS
 
 		safe_printf("ls : lists the contents of the current folder\n");
 	}
 
-	else if((strcmp((const char *)string[1], "cd") == 0)){
+	else if((strcmp((const char *)string[1], "cd") == 0)){														// CD
 
 		safe_printf("cd <dir> : changes the current working folder to <dir>\n");
 	}
 
-	else if((strcmp((const char *)string[1], "mkdir") == 0)){
+	else if((strcmp((const char *)string[1], "mkdir") == 0)){													// MKDIR
 
 		safe_printf("mkdir <dir> : creates a new folder <dir>\n");
 	}
 
-	else if((strcmp((const char *)string[1], "rm") == 0)){
+	else if((strcmp((const char *)string[1], "rm") == 0)){														// RM
 
 		safe_printf("rm <file> : deletes the file <file>\n");
 	}
-
-	else if((strcmp((const char *)string[1], "cp") == 0)){
+	
+	else if((strcmp((const char *)string[1], "cp") == 0)){														// CP
 
 		safe_printf("cp <src> <dst> : copies the file <src> to the destination <dst>\n");
 	}
 
-	else if((strcmp((const char *)string[1], "clear") == 0)){
+	else if((strcmp((const char *)string[1], "clear") == 0)){													// Clear
 
 		safe_printf("clear : clears and resets terminal screen\n");
 	}
@@ -208,10 +206,10 @@ void helpfn(uint8_t** string){
 // Output: Copies the specified file to the destination location
 int8_t cp_f(uint8_t** string){
 	FRESULT res;
-	char *path = string[1];
-	char *path1 = string[2];
-	res = f_rename(path, path1);
-	errors(res);
+	char *path = string[1];		// Path to store source file
+	char *path1 = string[2];	// Path to store destination file
+	res = f_rename(path, path1);// Renames path with path1
+	errors(res);				// Captures all errors
 	if (res != FR_OK){
 		safe_printf("ERROR: Could not copy file '%s' to '%s'\n", string[1], string[2]);
 		return 1;
@@ -228,14 +226,14 @@ int8_t cp_f(uint8_t** string){
 int8_t rm_f(uint8_t** string){
 	FILINFO * info;
 	FRESULT res;
-	char *path = string[1];
-	res = f_stat(path, info);
-	errors(res);
+	char *path = string[1];		// Path to store file to delete
+	res = f_stat(path, info);	// Checks if file exists first
+	errors(res);				// Captures all errors
 	if (res == FR_INVALID_NAME){
 		safe_printf("ERROR: The file '%s' does not exist\n", string[1]);
 		return 1;
 	}else{
-		res = f_unlink(path);
+		res = f_unlink(path);	// Deletes the file
 		if (res==FR_OK){
 			safe_printf("File '%s' removed\n", string[1]);
 		}else if(res == FR_DENIED){
@@ -252,14 +250,13 @@ int8_t rm_f(uint8_t** string){
 // Output: Changes the current working folder
 int8_t cd_f(uint8_t** string, uint8_t word_count){
 	FRESULT res;
-	if (word_count < 3) {
-		if (word_count < 2) {
-			string[1] = "/";
+	if (word_count < 4) {
+		if (word_count < 3) {
+			string[2] = "/";	// Needed for correct syntax of directory paths 
 		}
-		char *path = string[1];
-		// change directory to the path
-		res = f_chdir(path);
-		errors(res);
+		char *path = string[1];	// Path to store the directory folder to change to
+		res = f_chdir(path);	// Changes directory to the path
+		errors(res);			// Captures all errors
 		if (res != FR_OK) {
 			safe_printf("ERROR: Unknown directory command '%d'\n", res);
 			return 1;
@@ -279,17 +276,15 @@ int8_t cd_f(uint8_t** string, uint8_t word_count){
 // Output: Creates a new folder
 int8_t mkdir_f(uint8_t** string){
 	FRESULT res;
-	//safe_printf("string[1] = %s\n", string[1]);
-	char *path = string[1];
-	res = f_mkdir(path);
-	errors(res);
+	char *path = string[1];	// Path to store the new directory folder
+	res = f_mkdir(path);	// Makes a new directory folder (path)
+	errors(res);			// Captures all errors
 	if (res != FR_OK) {
 		safe_printf("ERROR: Unknown directory command '%d'\n", res);
 		return 1;
 	}else{
 		safe_printf("Folder '%s' created\n", string[1]);
 	}
-
 	return 0;
 }
 
@@ -306,30 +301,30 @@ int ls_f(){
 	int folders = 0, files = 0;
 	UINT pathlength = 20;
 
-	f_mount(&fs, "", 1);
+	f_mount(&fs, "", 1);								/* Mounts the SD card */
 	f_getcwd(path[20], pathlength);
 	//safe_printf("path = %x\n", path);
-	res = f_opendir(&dir, path);                       /* Open the directory */
+	res = f_opendir(&dir, path);                       	/* Open the directory */
 	if (res == FR_OK) {
 		for (;;) {
-			res = f_readdir(&dir, &inf);                   /* Read a directory item */
+			res = f_readdir(&dir, &inf);               	/* Read a directory item */
 			if (res != FR_OK){
-				errors(res);
+				errors(res);							/* Captures all errors */
 				break;
 			}
 			if(inf.fname[0] == 0){
-				break;  /* Break on error or end of dir */
+				break;  								/* Break on error or end of directory */
 			}
-			if (inf.fattrib & AM_DIR) {                    /* It is a directory */
-															/* Enter the directory */
+			if (inf.fattrib & AM_DIR) {           		/* It is a directory */
+														/* Enter the directory */
 				if (res != FR_OK){
 					errors(res);
 					break;
 				}
-				safe_printf("%s (folder)\n", inf.fname);
+				safe_printf("%s (folder)\n", inf.fname);/* Prints all folders */
 				folders += 1;
-			} else {                                       /* It is a file. */
-				safe_printf("%s (%d bytes)\n", inf.fname, inf.fsize);
+			} else {                                 	/* It is a file */
+				safe_printf("%s (%d bytes)\n", inf.fname, inf.fsize);	/* Prints all files */
 				//printf("%s\n",inf.fattrib);
 				//safe_printf("Date: %d\n", inf.fdate);
 				//safe_printf("Time: %d\n", inf.ftime);
@@ -338,7 +333,7 @@ int ls_f(){
 		}
 		safe_printf("Folders: %d\n", folders);
 		safe_printf("Files: %d\n", files);
-		f_closedir(&dir);
+		f_closedir(&dir);								/* Closes the directory */
 
 	}else{
 		safe_printf("ERROR: SD card could not be read properly\n");
@@ -485,28 +480,28 @@ int string_parser(uint8_t *input_p, uint8_t **array_of_words_p[]){
 }
 
 void errors(FRESULT code){
-	if (code == FR_OK){safe_printf("The function succeeded.");}
-	else if (code == FR_DISK_ERR){safe_printf("The lower layer, disk_read, disk_write or disk_ioctl function, reported that an unrecoverable hard error occured.");}
-	else if (code == FR_INT_ERR ){safe_printf("Assertion failed. An insanity is detected in the internal process. One of the following possibilities is suspected.\n\rWork area (file system object, file object or etc...) has been broken by stack overflow or any other tasks. This is the reason in most case.\nThere is an error of the FAT structure on the volume.\n\rThere is a bug in the FatFs module itself.\n\rWrong lower layer implementation.");}
-	else if (code == FR_NOT_READY){safe_printf("The lower layer, disk_initialize function, reported that the storage device could not be got ready to work. One of the following possibilities is suspected.\n\rNo medium in the drive.\n\rWrong lower layer implementation.\n\rWrong hardware configuration.\n\rThe storage device has been broken.");}
-	else if (code == FR_NO_FILE){safe_printf("Could not find the file.");}
-	else if (code == FR_NO_PATH){safe_printf("Could not find the path.");}
-	else if (code == FR_INVALID_NAME){safe_printf("The given string is invalid as the path name. One of the following possibilities is suspected.\n\rThere is any character not allowed for the file name.\n\rThe string is out of 8.3 format. (at non-LFN cfg.)\n\rFF_MAX_LFN is insufficient for the file name. (at LFN cfg.)\n\rThere is any character encoding error in the string.");}
-	else if (code == FR_DENIED){safe_printf("The required access was denied due to one of the following reasons:\n\rWrite mode open against the read-only file.\n\rDeleting the read-only file or directory.\n\rDeleting the non-empty directory or current directory.\n\rReading the file opened without FA_READ flag.\n\rAny modification to the file opened without FA_WRITE flag.\n\rCould not create the object due to root directory full or disk full.\n\rCould not allocate a contiguous area to the file.");}
-	else if (code == FR_EXIST){safe_printf("Name collision. An object with the same name is already existing.");}
+	if (code == FR_OK){ if(debug_global){safe_printf("The function succeeded.\n");}}
+	else if (code == FR_DISK_ERR){safe_printf("The lower layer, disk_read, disk_write or disk_ioctl function, reported that an unrecoverable hard error occured.\n");}
+	else if (code == FR_INT_ERR ){safe_printf("Assertion failed. An insanity is detected in the internal process. One of the following possibilities is suspected.\n\rWork area (file system object, file object or etc...) has been broken by stack overflow or any other tasks. This is the reason in most case.\nThere is an error of the FAT structure on the volume.\n\rThere is a bug in the FatFs module itself.\n\rWrong lower layer implementation.\n");}
+	else if (code == FR_NOT_READY){safe_printf("The lower layer, disk_initialize function, reported that the storage device could not be got ready to work. One of the following possibilities is suspected.\n\rNo medium in the drive.\n\rWrong lower layer implementation.\n\rWrong hardware configuration.\n\rThe storage device has been broken.\n");}
+	else if (code == FR_NO_FILE){safe_printf("Could not find the file.\n");}
+	else if (code == FR_NO_PATH){safe_printf("Could not find the path.\n");}
+	else if (code == FR_INVALID_NAME){safe_printf("The given string is invalid as the path name. One of the following possibilities is suspected.\n\rThere is any character not allowed for the file name.\n\rThe string is out of 8.3 format. (at non-LFN cfg.)\n\rFF_MAX_LFN is insufficient for the file name. (at LFN cfg.)\n\rThere is any character encoding error in the string.\n");}
+	else if (code == FR_DENIED){safe_printf("The required access was denied due to one of the following reasons:\n\rWrite mode open against the read-only file.\n\rDeleting the read-only file or directory.\n\rDeleting the non-empty directory or current directory.\n\rReading the file opened without FA_READ flag.\n\rAny modification to the file opened without FA_WRITE flag.\n\rCould not create the object due to root directory full or disk full.\n\rCould not allocate a contiguous area to the file.\n");}
+	else if (code == FR_EXIST){safe_printf("Name collision. An object with the same name is already existing.\n");}
 	else if (code == FR_INVALID_OBJECT){safe_printf("The file/directory object is invalid or a null pointer is given. There are some reasons as follows:\n\r	It has been closed, or collapsed.\n\rPhysical drive is not ready to work due to a media removal.\n\r");}
-	else if (code == FR_WRITE_PROTECTED){safe_printf("A write mode operation against the write-protected media.");}
-	else if (code == FR_INVALID_DRIVE){safe_printf("Invalid drive number is specified in the path name. A null pointer is given as the path name. (Related option: FF_VOLUMES)");}
-	else if (code == FR_NOT_ENABLED){safe_printf("Work area for the logical drive has not been registered by f_mount function.");}
-	else if (code == FR_NO_FILESYSTEM){safe_printf("There is no valid FAT volume on the drive or wrong lower layer implementation.");}
-	else if (code == FR_MKFS_ABORTED){safe_printf("The f_mkfs function aborted before start in format due to a reason as follows:\n\r	It is impossible to format with the given parameters.\n\rThe size of volume is too small. 128 sectors minimum with FM_SFD.\n\rThe partition bound to the logical drive coulud not be found. (Related option: FF_MULTI_PARTITION)");}
-	else if (code == FR_TIMEOUT){safe_printf("The function was canceled due to a timeout of thread-safe control. (Related option: FF_TIMEOUT)");}
-	else if (code == FR_LOCKED){safe_printf("The operation to the object was rejected by file sharing control. (Related option: FF_FS_LOCK)");}
-	else if (code == FR_NOT_ENOUGH_CORE){safe_printf("Not enough memory for the operation.");}
-	else if (code == FR_TOO_MANY_OPEN_FILES){safe_printf("Number of open objects has been reached maximum value and no more object can be opened. (Related option: FF_FS_LOCK)");}
-	else if (code == FR_INVALID_PARAMETER){safe_printf("The given parameter is invalid or there is an inconsistent for the volume.");}
+	else if (code == FR_WRITE_PROTECTED){safe_printf("A write mode operation against the write-protected media.\n");}
+	else if (code == FR_INVALID_DRIVE){safe_printf("Invalid drive number is specified in the path name. A null pointer is given as the path name. (Related option: FF_VOLUMES)\n");}
+	else if (code == FR_NOT_ENABLED){safe_printf("Work area for the logical drive has not been registered by f_mount function.\n");}
+	else if (code == FR_NO_FILESYSTEM){safe_printf("There is no valid FAT volume on the drive or wrong lower layer implementation.\n");}
+	else if (code == FR_MKFS_ABORTED){safe_printf("The f_mkfs function aborted before start in format due to a reason as follows:\n\r	It is impossible to format with the given parameters.\n\rThe size of volume is too small. 128 sectors minimum with FM_SFD.\n\rThe partition bound to the logical drive coulud not be found. (Related option: FF_MULTI_PARTITION)\n");}
+	else if (code == FR_TIMEOUT){safe_printf("The function was canceled due to a timeout of thread-safe control. (Related option: FF_TIMEOUT)\n");}
+	else if (code == FR_LOCKED){safe_printf("The operation to the object was rejected by file sharing control. (Related option: FF_FS_LOCK)\n");}
+	else if (code == FR_NOT_ENOUGH_CORE){safe_printf("Not enough memory for the operation.\n");}
+	else if (code == FR_TOO_MANY_OPEN_FILES){safe_printf("Number of open objects has been reached maximum value and no more object can be opened. (Related option: FF_FS_LOCK)\n");}
+	else if (code == FR_INVALID_PARAMETER){safe_printf("The given parameter is invalid or there is an inconsistent for the volume.\n");}
 	else{
-		safe_printf("Uspecified FATFS error");
+		safe_printf("Unspecified FATFS error\n");
 	}
 
 }
