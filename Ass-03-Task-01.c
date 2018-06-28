@@ -150,7 +150,7 @@ void Ass_03_Task_01(void const * argument)
 
 
 
-// --------------------- Functions ---------------------
+// ----------------------------------------- Functions -----------------------------------------
 
 // Function: Help
 // Input: A valid array of words
@@ -348,53 +348,6 @@ int ls_f(){
 	return res;
 }
 
-//	char buff[256];
-//	res = f_mount(&fs, "", 1);
-//	if (res == FR_OK) {
-//		strcpy(buff, "/");
-//		res = scan_files(buff);
-//	}
-//	return 0;
-//}
-
-// Function: Scan Files
-// Input: A valid char pointer to the directory path
-// Result: Lists the contents of the specified path
-//FRESULT scan_files(char* path){
-//	FRESULT res;
-//	DIR dir;
-//	int i;
-//	static FILINFO inf;
-//	int folders = 0, files = 0;
-//
-//	res = f_opendir(&dir, path);                       /* Open the directory */
-//	if (res == FR_OK) {
-//		for (;;) {
-//			res = f_readdir(&dir, &inf);                   /* Read a directory item */
-//			if (res != FR_OK || inf.fname[0] == 0) break;  /* Break on error or end of dir */
-//			if (inf.fattrib & AM_DIR) {                    /* It is a directory */
-//				i = strlen(path);
-//				sprintf(&path[i], "/%s", inf.fname);
-//				res = scan_files(path);                    /* Enter the directory */
-//				if (res != FR_OK) break;
-//				path[i] = 0;
-//				safe_printf("%s (folder)\n", inf.fname);
-//				folders++;
-//			} else {                                       /* It is a file. */
-//				safe_printf("%s (%d bytes)\n", inf.fname, inf.fsize);
-//				//printf("%s\n",inf.fattrib);
-//				//safe_printf("Date: %d\n", inf.fdate);
-//				//safe_printf("Time: %d\n", inf.ftime);
-//				files++;
-//			}
-//		}
-//		f_closedir(&dir);
-//	}
-//	safe_printf("Folders: %d\n", folders);
-//	safe_printf("Files: %d\n", files);
-//	return res;
-//}
-
 // Function: Plot Analog Input
 // Input: A valid pointer to the analog variable, the input string and the debug option
 // Result: Updates and converts analog value to an integer and updates scale on LCD screen
@@ -531,73 +484,6 @@ int string_parser(uint8_t *input_p, uint8_t **array_of_words_p[]){
 
 }
 
-
-//// Function: Read File
-//// Input: 
-//// Result: 
-//uint8_t myReadFile()
-//{
-//#define READ_FILE "Hello.txt"
-//#define BUFF_SIZE 256
-//	uint8_t rtext[BUFF_SIZE];
-//	FRESULT res;
-//	uint32_t bytesread;
-//
-//	// Open file Hello.txt
-//	if((res = f_open(&MyFile, READ_FILE, FA_READ)) != FR_OK)
-//	{
-//		safe_printf("ERROR: Opening '%s'\n", READ_FILE);
-//		return 1;
-//	}
-//	safe_printf("Task 1: Opened file '%s'\n", READ_FILE);
-//
-//	// Read data from file
-//	if ((res = f_read(&MyFile, rtext, BUFF_SIZE-1, &bytesread)) != FR_OK)
-//	{
-//		safe_printf("ERROR: Reading '%s'\n", READ_FILE);
-//		f_close(&MyFile);
-//		return 1;
-//	}
-//	rtext[bytesread] = '\0';
-//	safe_printf("Task 1: Read: '%s'\n", rtext);
-//
-//	// Close file
-//	f_close(&MyFile);
-//
-//	return 0;
-//}
-//
-//// Function: Write File
-//// Input: 
-//// Result: 
-//uint8_t myWriteFile()
-//{
-//#define WRITE_FILE "Hello.txt"
-//	FRESULT res;
-//	UINT byteswritten;
-//
-//	// Open file There.txt
-//	if((res = f_open(&MyFile, WRITE_FILE, FA_CREATE_ALWAYS | FA_WRITE)) != FR_OK)
-//	{
-//		safe_printf("ERROR: Opening '%s'\n", WRITE_FILE);
-//		return 1;
-//	}
-//	safe_printf("Task 1: Opened file '%s'\n", WRITE_FILE);
-//
-//	// Write to file
-//	if ((res = f_write(&MyFile, "Hello", 6, &byteswritten)) != FR_OK)
-//	{
-//		safe_printf("ERROR: Writing '%s'\n", WRITE_FILE);
-//		f_close(&MyFile);
-//		return 1;
-//	}
-//	safe_printf("Task 1: Written: %d bytes\n", byteswritten);
-//
-//	// Close file
-//	f_close(&MyFile);
-//
-//	return 0;
-//}
 void errors(FRESULT code){
 	if (code == FR_OK){safe_printf("The function succeeded.");}
 	else if (code == FR_DISK_ERR){safe_printf("The lower layer, disk_read, disk_write or disk_ioctl function, reported that an unrecoverable hard error occured.");}
